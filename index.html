@@ -104,6 +104,35 @@
     .map-viewer:before{content:'';position:absolute;inset:12% 8% 6%;pointer-events:none;border-radius:28px;background:radial-gradient(ellipse at 50% 63%,rgba(189,114,234,.14),transparent 67%);z-index:0}
     .map-guide .legend span{font-weight:800}
     @media(prefers-reduced-motion:reduce){.district-wrap,.label-group{transition:none!important}}
+
+    /* V11: hide verbose green source badge, retain connectivity errors */
+    #sharedSourceBanner.good, #sharedSourceBanner:not(.bad){display:none!important}
+    body.no-live-data #breakdownPanel{display:none!important}
+    .breakdown-panel{margin-top:18px}
+    .breakdown-toolbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:15px 20px;background:linear-gradient(110deg,#fff9fd,#f9f3ff);border-bottom:1px solid #f0def6}
+    .breakdown-search{height:42px;min-width:210px;flex:1;max-width:480px;border:1px solid #e3c6ef;border-radius:11px;background:white;color:#503263;padding:9px 14px;font:inherit}
+    .breakdown-check{display:flex;align-items:center;gap:8px;font-size:13px;color:#76547f;font-weight:700;cursor:pointer}
+    .breakdown-check input{accent-color:#a74bbb;width:16px;height:16px}
+    .breakdown-table-wrap{overflow:auto;max-height:660px;scrollbar-color:#d5a6e7 #fff4fb}
+    .breakdown-table{width:100%;min-width:980px;border-collapse:separate;border-spacing:0;color:#543b5e;font-size:13px}
+    .breakdown-table th,.breakdown-table td{padding:11px 12px;border-bottom:1px solid #f0e2f2;vertical-align:middle}
+    .breakdown-table thead th{position:sticky;top:0;background:#f8eaf8;color:#783b8c;z-index:3;text-align:center;font-weight:800;white-space:nowrap}
+    .breakdown-table thead th:first-child{text-align:left;position:sticky;left:0;z-index:4;min-width:290px}
+    .breakdown-table td:first-child{position:sticky;left:0;z-index:2;background:#fff;border-right:1px solid #f1e5f2;min-width:290px;max-width:370px}
+    .breakdown-table tbody tr:nth-child(even):not(.breakdown-group) td:first-child{background:#fffbfe}
+    .breakdown-table tbody tr:hover:not(.breakdown-group) td{background:#fff4fc}
+    .breakdown-table tbody tr:hover:not(.breakdown-group) td:first-child{background:#fff4fc}
+    .breakdown-table .breakdown-group th{position:relative;text-align:left;background:linear-gradient(100deg,#f4e3f8,#fff5fa);color:#74378a;font-size:13px;font-weight:800;padding:10px 15px;border-bottom:1px solid #e7cfef}
+    .breakdown-title{font-weight:700;color:#403451;line-height:1.45}
+    .breakdown-title b{color:#a23698;margin-right:7px;white-space:nowrap}
+    .breakdown-unit{font-size:11px;color:#86718e;margin-top:3px}
+    .breakdown-value{text-align:center;min-width:84px;font-variant-numeric:tabular-nums;font-weight:800}
+    .breakdown-hit{color:#a62678;background:#fff0f8;padding:5px 9px;border:1px solid #f4cae3;border-radius:9px;display:inline-block;min-width:47px}
+    .breakdown-zero{color:#809084;font-weight:600}.breakdown-missing{color:#a6a1ac;font-weight:600}
+    .breakdown-blank{padding:35px 15px!important;text-align:center;color:#84718e}
+    .breakdown-summary{padding:12px 19px;font-size:13px;font-weight:700;color:#794d88;background:#fdf6fd;border-top:1px solid #f1e2f5}
+    .breakdown-foot{margin:0;padding:10px 19px 19px;font-size:12px;color:#7e7084}
+    @media(max-width:700px){.breakdown-toolbar{padding:12px}.breakdown-search{min-width:100%;max-width:none}.breakdown-table{min-width:740px}.breakdown-table thead th:first-child,.breakdown-table td:first-child{min-width:215px;max-width:235px}.breakdown-panel .panel-hd{padding:15px}}
   </style>
 </head>
 <body>
@@ -141,7 +170,14 @@
           </svg>
           </div></div><div class="map-controls"><button type="button" class="btn primary" id="map3dBtn" aria-pressed="false">✦ ยกแผนที่เป็น 3 มิติ</button><button type="button" class="btn" id="mapResetBtn">↺ มุมมองปกติ</button><span class="map-interaction-hint">คลิกอำเภอบนแผนที่เพื่อยกแผนที่และดูรายละเอียด · ขยับเมาส์เพื่อปรับมุม</span></div><div class="map-guide"><div class="legend"><span><i class="swatch" style="background:#cbd5e1"></i>0% ยังไม่เริ่ม</span><span><i class="swatch" style="background:#ef5350"></i>1–49% สีแดง</span><span><i class="swatch" style="background:#ffdb5c"></i>50–79% สีเหลือง</span><span><i class="swatch" style="background:#58d89f"></i>80–100% สีเขียว</span></div><span class="map-help">เปอร์เซ็นต์ตั้งแต่ 50.00 และ 80.00 ขึ้นไปเปลี่ยนระดับสี</span></div></section>
         <section class="panel"><div class="panel-hd"><div><h3>🏅 อันดับความคืบหน้ารายอำเภอ</h3><p>เรียงจากเปอร์เซ็นต์สูงสุดไปต่ำสุด</p></div><span class="small-label" id="rankingLabel">ล่าสุด</span></div><div class="ranking-list" id="rankingList"></div><div class="detail-strip" id="selectedDetail"><div class="detail-title"><strong id="detailName">อำเภอเมืองอุทัยธานี</strong><button class="btn tiny" id="exportDistrictBtn">⬇ ภาพอำเภอ</button></div><div class="detail-big" id="detailPercent">0%</div><div class="detail-meta" id="detailMeta">0 / 0 ครัวเรือน</div><div id="detailDuplicate" style="margin-top:13px" hidden><div class="dup-progress"><div class="dup-progress-fill" id="detailDuplicateBar" style="width:0%"></div></div><div class="dup-summary" id="detailDuplicateText">ประชากรซ้ำ ตรวจสอบแล้ว 0 / 0 คน (0%)</div></div></div></section>
-      </div><section id="categoryDashboard" class="category-dashboard panel" hidden><div class="panel-hd"><div><h3>🏠 สรุปครัวเรือนตกเกณฑ์ แยก 5 ด้าน</h3><p>จากรายงานตัวชี้วัด จปฐ. ปี 2570 (แยกหน่วยครัวเรือนและคน)</p></div><div class="action-row"><select id="categoryDistrictFilter" aria-label="เลือกอำเภอเพื่อดูยอดตกเกณฑ์รายด้าน" class="category-filter"><option value="all">รวม 8 อำเภอ</option></select><span class="small-label" id="categoryCoverage">รายงาน 0/8 อำเภอ</span></div></div><div id="categorySummaryGrid" class="category-grid"></div><p class="category-note">หมายเหตุ: ตัวเลขเป็นผลรวม <b>รายการไม่ผ่านเกณฑ์รายตัวชี้วัด</b> ซึ่งอาจนับครัวเรือนหรือคนซ้ำข้ามตัวชี้วัด จึงไม่ใช่จำนวนครัวเรือนตกเกณฑ์ที่ไม่ซ้ำกัน · ช่องว่างหมายถึงยังไม่ได้นำเข้ารายงาน</p></section><p class="minor-note" id="dataFootnote">สีและตัวเลขตัวอย่างใช้เพื่อสาธิตเท่านั้น จนกว่าจะเชื่อมต่อ Google Apps Script</p>
+      </div><section id="categoryDashboard" class="category-dashboard panel" hidden><div class="panel-hd"><div><h3>🏠 สรุปครัวเรือนตกเกณฑ์ แยก 5 ด้าน</h3><p>จากรายงานตัวชี้วัด จปฐ. ปี 2570 (แยกหน่วยครัวเรือนและคน)</p></div><div class="action-row"><select id="categoryDistrictFilter" aria-label="เลือกอำเภอเพื่อดูยอดตกเกณฑ์รายด้าน" class="category-filter"><option value="all">รวม 8 อำเภอ</option></select><span class="small-label" id="categoryCoverage">รายงาน 0/8 อำเภอ</span></div></div><div id="categorySummaryGrid" class="category-grid"></div><p class="category-note">หมายเหตุ: ตัวเลขเป็นผลรวม <b>รายการไม่ผ่านเกณฑ์รายตัวชี้วัด</b> ซึ่งอาจนับครัวเรือนหรือคนซ้ำข้ามตัวชี้วัด จึงไม่ใช่จำนวนครัวเรือนตกเกณฑ์ที่ไม่ซ้ำกัน · ช่องว่างหมายถึงยังไม่ได้นำเข้ารายงาน</p></section><section class="panel breakdown-panel" id="breakdownPanel" aria-label="รายละเอียดตัวชี้วัดที่ตกเกณฑ์รายอำเภอ">
+        <div class="panel-hd"><div><h3>🔍 รายละเอียดตกเกณฑ์รายข้อ · 8 อำเภอ</h3><p>แสดงตัวชี้วัดที่ไม่ผ่านเกณฑ์ ข้อ 1–38 แยกจำนวนตามอำเภอ · คลิกพื้นที่แผนที่หรือเปลี่ยนตัวเลือกด้านบนเพื่อดูเฉพาะอำเภอ</p></div><span class="small-label" id="breakdownCoverage">ข้อมูล 0 / 8 อำเภอ</span></div>
+        <div class="breakdown-toolbar"><input type="search" class="breakdown-search" id="breakdownSearch" aria-label="ค้นหาหมายเลขหรือชื่อตัวชี้วัด" placeholder="ค้นหาข้อ เช่น 12 หรือ ตรวจสุขภาพ"><label class="breakdown-check"><input type="checkbox" id="breakdownShowAll">แสดงทั้ง 38 ข้อ (รวมข้อที่ไม่ตกเกณฑ์)</label></div>
+        <div class="breakdown-table-wrap"><table class="breakdown-table" aria-label="ตารางจำนวนไม่ผ่านเกณฑ์รายตัวชี้วัดของทั้ง 8 อำเภอ"><thead id="breakdownHead"></thead><tbody id="breakdownBody"></tbody></table></div>
+        <div class="breakdown-summary" id="breakdownSummary" aria-live="polite"></div>
+        <p class="breakdown-foot"><b>หมายเหตุ</b>: ตัวเลขเป็นจำนวน <b>รายการไม่ผ่านเกณฑ์รายตัวชี้วัด</b> แยกหน่วย คร. และ คน ไม่ใช่จำนวนครัวเรือนที่ไม่ซ้ำกัน · เครื่องหมาย — = ยังไม่มีรายงาน / 0 = รายงานแล้วว่าไม่พบการตกเกณฑ์</p>
+      </section>
+      <p class="minor-note" id="dataFootnote">สีและตัวเลขตัวอย่างใช้เพื่อสาธิตเท่านั้น จนกว่าจะเชื่อมต่อ Google Apps Script</p>
     </section>
     <section class="page" id="editPage" aria-label="บันทึกข้อมูลความคืบหน้า"><div class="section-heading"><div><h2>✏️ บันทึกความคืบหน้ารายอำเภอ</h2><p>แก้ไขข้อมูลทีละอำเภอ แยกตามประเภทการจัดเก็บ และคำนวณเปอร์เซ็นต์โดยอัตโนมัติ</p></div></div><div class="edit-layout"><div class="panel form-panel"><h3>แบบฟอร์มข้อมูลการจัดเก็บ</h3><p class="lead">กรอกเป้าหมายและผลจัดเก็บ หรือปรับเปอร์เซ็นต์โดยตรงเพื่อคำนวณผลการจัดเก็บโดยประมาณ</p><form id="progressForm"><div class="field-grid"><div class="field"><label for="editDataset">ชุดข้อมูล</label><select id="editDataset"><option value="jpt">จปฐ. ปี พ.ศ. 2570</option><option value="gcc">กชช. 2ค ปี พ.ศ. 2570</option></select></div><div class="field"><label for="editDistrict">อำเภอ</label><select id="editDistrict"></select></div></div><div class="field-grid"><div class="field"><label for="targetInput">เป้าหมายการจัดเก็บ (<span class="unitText">ครัวเรือน</span>)</label><input id="targetInput" type="number" min="0" max="100000000" step="1" placeholder="เช่น 5000" required></div><div class="field"><label for="completedInput">ผลการจัดเก็บสุทธิแล้ว ไม่รวมครัวเรือนรอตรวจสอบ (<span class="unitText">ครัวเรือน</span>)</label><input id="completedInput" type="number" min="0" max="100000000" step="1" placeholder="เช่น 2500" required></div></div><div class="field" id="pendingField"><label for="pendingInput">ครัวเรือนรอตรวจสอบ (ครัวเรือน)</label><input id="pendingInput" type="number" min="0" max="100000000" step="1" inputmode="numeric" placeholder="เช่น 125" required><span class="hint">กรอกยอดครัวเรือนที่รอตรวจสอบ แยกจากยอดจัดเก็บและเป้าหมาย ไม่ถูกนำไปบวกในการคำนวณเปอร์เซ็นต์ (เฉพาะ จปฐ.)</span></div><div id="duplicateFields" class="duplicate-fields"><div class="section-mini">👥 ความคืบหน้าการตรวจสอบประชากรซ้ำ (เฉพาะ จปฐ.)</div><div class="field-grid"><div class="field"><label for="duplicateTargetInput">จำนวนประชากรซ้ำทั้งหมด (คน)</label><input id="duplicateTargetInput" type="number" min="0" max="100000000" step="1" required placeholder="เช่น 200"></div><div class="field"><label for="duplicateResolvedInput">ตรวจสอบประชากรซ้ำแล้ว (คน)</label><input id="duplicateResolvedInput" type="number" min="0" max="100000000" step="1" required placeholder="เช่น 150"></div></div><div class="field-grid"><div class="field"><label for="duplicatePercentInput">ความคืบหน้าตรวจสอบประชากรซ้ำ (%)</label><input id="duplicatePercentInput" type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="0 - 100"><span class="hint">ปรับเปอร์เซ็นต์ได้ ระบบจะคำนวณจำนวนตรวจสอบแล้วตามเป้าหมาย</span></div><div class="field"><label for="duplicateRemainingInput">ประชากรซ้ำคงเหลือ (คน)</label><input id="duplicateRemainingInput" type="number" readonly aria-readonly="true"><span class="hint">คำนวณโดยอัตโนมัติ ไม่เกี่ยวกับเปอร์เซ็นต์จัดเก็บ จปฐ.</span></div></div></div><div class="field"><label for="percentInput">ความคืบหน้าการจัดเก็บ (%)</label><input id="percentInput" type="number" min="0" max="100" step="0.01" inputmode="decimal" placeholder="0 - 100"><span class="hint">ปรับเปอร์เซ็นต์ได้โดยตรง ระบบจะคำนวณจำนวนที่จัดเก็บตามเป้าหมาย (ปัดเป็นจำนวนเต็ม)</span></div><div class="form-actions"><button type="submit" class="btn green" id="saveBtn">💾 บันทึกข้อมูล</button><button type="button" class="btn" id="loadEditBtn">⟳ โหลดข้อมูลล่าสุด</button></div><div class="message" id="editMessage" role="status"></div></form></div><aside class="panel side-info"><h3>แนวทางบันทึกข้อมูล</h3><ol class="steps"><li>เลือกเมนู จปฐ. หรือ กชช. 2ค และเลือกอำเภอที่ต้องการบันทึก</li><li>กรอกจำนวนเป้าหมายและจำนวนจัดเก็บ หรือกรอกเปอร์เซ็นต์เพื่อคำนวณจำนวนโดยประมาณ</li><li>สำหรับ จปฐ. กรอกครัวเรือนรอตรวจสอบ และเป้าหมาย/ผลตรวจสอบประชากรซ้ำเพิ่มเติม (ไม่ส่งผลต่อเปอร์เซ็นต์การจัดเก็บ)</li><li>กดบันทึก ระบบจะตรวจสอบผลจาก Google Sheets ก่อนแจ้งว่าสำเร็จ โดยไม่ต้องใช้ PIN</li></ol><div class="tip">⚠️ เมื่อไม่ใช้ PIN ผู้ที่ทราบลิงก์ Web App อาจส่งข้อมูลเข้าระบบได้ ใช้งานเฉพาะข้อมูลสรุประดับอำเภอ ห้ามใส่ข้อมูลส่วนบุคคล</div></aside></div></section>
 
@@ -199,6 +235,47 @@
   ];
   // หน่วยนับของตัวชี้วัดในแบบรายงาน จปฐ. 2570: คำนวณยอดหน่วยครัวเรือนแยกจากหน่วยคน
   const HOUSEHOLD_INDICATORS = new Set([6,7,8,13,14,15,16,17,18,19,20,21,26,29,30,36,38]);
+  const INDICATOR_NAMES = [
+    'การฝากครรภ์อย่างมีคุณภาพ',
+    'เด็กแรกเกิดมีน้ำหนัก 2,500 กรัมขึ้นไป',
+    'เด็กแรกเกิดกินนมแม่อย่างเดียว 6 เดือนแรก',
+    'เด็กได้รับวัคซีนป้องกันโรคครบตามกำหนด',
+    'เด็กได้รับการดูแลและมีพัฒนาการเหมาะสม',
+    'ครัวเรือนกินอาหารถูกสุขลักษณะและปลอดภัย',
+    'ครัวเรือนรู้จักป้องกันปัจจัยเสี่ยงด้านสุขภาพ',
+    'ครัวเรือนดูแลสมาชิกเมื่อเจ็บป่วยเบื้องต้น',
+    'คนอายุ 6 ปีขึ้นไปออกกำลังกายสม่ำเสมอ',
+    'ผู้ป่วยติดเตียงได้รับการดูแล',
+    'คนมีประกันสุขภาพหรือสิทธิรักษาพยาบาล',
+    'คนอายุ 35 ปีขึ้นไปตรวจสุขภาพประจำปี',
+    'ครัวเรือนมีที่อยู่อาศัยมั่นคงและเหมาะสม',
+    'ครัวเรือนจัดการขยะอย่างถูกสุขลักษณะ',
+    'ครัวเรือนไม่ได้รับผลกระทบจากมลพิษ',
+    'ครัวเรือนป้องกันอุบัติภัยและเตรียมพร้อมภัยพิบัติ',
+    'ครัวเรือนมีความปลอดภัยในชีวิตและทรัพย์สิน',
+    'ครัวเรือนมีน้ำอุปโภคบริโภคเพียงพอตลอดปี',
+    'ครัวเรือนเข้าถึงไฟฟ้าและใช้บริการไฟฟ้า',
+    'ครัวเรือนเข้าถึงโทรศัพท์เคลื่อนที่และอินเทอร์เน็ต',
+    'ครัวเรือนเข้าถึงบริการขนส่งสาธารณะ',
+    'เด็กอายุต่ำกว่า 6 ปีมีพัฒนาการเหมาะสมตามวัย',
+    'เด็กอายุ 6–15 ปีได้รับการศึกษาภาคบังคับ',
+    'เด็กจบ ม.3 ได้เรียนต่อหรือได้รับการฝึกอาชีพ',
+    'คนอายุ 15–59 ปีอ่านเขียนภาษาและคิดเลขได้',
+    'ครัวเรือนได้รับการศึกษาต่อเนื่องและทักษะที่จำเป็น',
+    'คนอายุ 15–59 ปีมีอาชีพและรายได้',
+    'คนอายุ 60 ปีขึ้นไปมีอาชีพหรือรายได้',
+    'รายได้เฉลี่ยของคนในครัวเรือนต่อปี',
+    'ครัวเรือนมีการเก็บออมเงิน',
+    'เด็กแรกเกิดถึง 6 ปีที่เข้าเกณฑ์ได้รับเงินอุดหนุน',
+    'ผู้มีคุณสมบัติได้รับสวัสดิการจากรัฐ',
+    'ได้รับความคุ้มครองตามระบบคุ้มครองทางสังคม',
+    'ผู้สูงอายุได้รับการดูแล',
+    'ผู้พิการได้รับการดูแล',
+    'ครอบครัวมีความอบอุ่น',
+    'คนอายุ 6 ปีขึ้นไปร่วมกิจกรรมทางศาสนา',
+    'ครัวเรือนมีส่วนร่วมกิจกรรมสาธารณะ'
+  ];
+
   function categoryTotals(districtIds){
     return CATEGORIES.map(cat=>{let households=0,people=0,reported=0,reportedHouseholds=0,reportedPeople=0;
       for(const d of districtIds)for(let i=cat.from;i<=cat.to;i++){
@@ -210,6 +287,40 @@
     });
   }
   function categoryTilesHtml(categories){return categories.map(c=>`<article class="category-tile"><div class="n">${c.icon} ${escapeHTML(c.name)}</div><div class="value">${c.reportedHouseholds?fmt(c.households)+' คร.':'— คร.'}</div><div class="people">${c.reportedPeople?fmt(c.people)+' คน (รายการ)':'— คน'}</div><div class="covered">รายงาน ${c.reported}/${c.totalSlots} ช่องตัวชี้วัด</div></article>`).join('');}
+  function renderDistrictBreakdown(){
+    const tableHead=$('breakdownHead'),tableBody=$('breakdownBody');
+    if(!tableHead||!tableBody)return;
+    const filter=$('categoryDistrictFilter')?.value||'all';
+    const districts=filter==='all'?DISTRICTS:DISTRICTS.filter(d=>d.id===filter);
+    const full=Boolean($('breakdownShowAll')?.checked);
+    const search=String($('breakdownSearch')?.value||'').toLocaleLowerCase('th-TH').trim();
+    const allRecords=DISTRICTS.filter(d=>Object.keys(state.indicators?.[d.id]||{}).length>0).length;
+    $('breakdownCoverage').textContent='รายงาน '+allRecords+' / 8 อำเภอ';
+    tableHead.innerHTML='<tr><th scope="col">หมายเลขและชื่อตัวชี้วัด</th>'+districts.map(d=>'<th scope="col">อ.'+escapeHTML(d.name)+'</th>').join('')+(districts.length>1?'<th scope="col">รวม</th>':'')+'</tr>';
+    const units=id=>HOUSEHOLD_INDICATORS.has(id)?'คร.':'คน';
+    let html='',shown=0,totalPositive=0;
+    for(const cat of CATEGORIES){
+      let content='',count=0;
+      for(let id=cat.from;id<=cat.to;id++){
+        const name=INDICATOR_NAMES[id-1]||('ตัวชี้วัดที่ '+id);
+        if(search&&!(String(id).includes(search)||name.toLocaleLowerCase('th-TH').includes(search)||cat.name.toLocaleLowerCase('th-TH').includes(search)))continue;
+        const values=districts.map(d=>state.indicators?.[d.id]?.[id]);
+        const present=values.some(v=>v!==undefined&&v!==null&&v!=='');
+        const sum=values.reduce((t,v)=>t+(Number(v)>0?Number(v):0),0);
+        if(!full&&sum<=0)continue;
+        const cells=values.map(v=>{
+          if(v===undefined||v===null||v==='')return '<td class="breakdown-value"><span class="breakdown-missing" title="ยังไม่ได้นำเข้ารายงาน">—</span></td>';
+          const n=Number(v);return '<td class="breakdown-value">'+(n>0?'<span class="breakdown-hit">'+fmt(n)+'</span>':'<span class="breakdown-zero">0</span>')+'</td>';
+        }).join('');
+        const totalCell=districts.length>1?'<td class="breakdown-value">'+(present?'<strong style="color:#963887">'+fmt(sum)+'</strong>':'<span class="breakdown-missing">—</span>')+'</td>':'';
+        content+='<tr><td><div class="breakdown-title"><b>ข้อ '+id+'</b>'+escapeHTML(name)+'</div><div class="breakdown-unit">หน่วยนับ: '+units(id)+'</div></td>'+cells+totalCell+'</tr>';
+        shown++;count++;if(sum>0)totalPositive++;
+      }
+      if(count){html+='<tr class="breakdown-group"><th colspan="'+(districts.length+(districts.length>1?2:1))+'" scope="rowgroup">'+cat.icon+' '+escapeHTML(cat.name)+' · '+count+' ข้อ'+(!full?' ที่พบการตกเกณฑ์':'')+'</th></tr>'+content;}
+    }
+    tableBody.innerHTML=html||'<tr><td class="breakdown-blank" colspan="'+(districts.length+(districts.length>1?2:1))+'">'+(search?'ไม่พบตัวชี้วัดตามคำค้น':'ยังไม่มีรายการตกเกณฑ์ที่มีข้อมูล กรุณานำเข้าผลตัวชี้วัด หรือเลือกแสดงทั้ง 38 ข้อ')+'</td></tr>';
+    $('breakdownSummary').textContent=(filter==='all'?'เปรียบเทียบทั้ง 8 อำเภอ':'เฉพาะอำเภอ'+(districts[0]?.name||''))+' · '+(full?'แสดง '+shown+' ข้อ':'มีข้อมูลไม่ผ่านเกณฑ์ '+totalPositive+' ข้อ')+' · แสดงหน่วยนับของแต่ละข้อแยกกัน';
+  }
   function renderCategorySummary(){
     if($('categoryDashboard')){$('categoryDashboard').hidden=state.dataset!=='jpt';}
     const selected=$('indicatorDistrictFilter')?.value||'all';
@@ -219,6 +330,7 @@
     $('categorySummaryGrid').innerHTML=categoryTilesHtml(categoryTotals(current==='all'?all:[current]));
     $('categoryIndicatorGrid').innerHTML=categoryTilesHtml(categoryTotals(ds));
     $('categoryCoverage').textContent='มีข้อมูล '+coverage+'/8 อำเภอ';
+    renderDistrictBreakdown();
   }
   const EXAMPLE = {
     jpt:{mueang:[8200,7260],thap:[5500,3580],sawang:[5100,4390],nongchang:[9400,7930],nongkhayang:[3200,1560],banrai:[13500,4725],lansak:[8300,5870],huay:[3400,890]},
@@ -958,6 +1070,8 @@
     $('indicatorDistrictFilter').innerHTML='<option value="all">ทุกอำเภอ</option>'+DISTRICTS.map(d=>`<option value="${d.id}">อ.${escapeHTML(d.name)}</option>`).join('');
     $('categoryDistrictFilter').innerHTML='<option value="all">รวม 8 อำเภอ</option>'+DISTRICTS.map(d=>`<option value="${d.id}">อ.${escapeHTML(d.name)}</option>`).join('');
     $('categoryDistrictFilter').addEventListener('change',renderCategorySummary);
+    $('breakdownSearch').addEventListener('input',renderDistrictBreakdown);
+    $('breakdownShowAll').addEventListener('change',renderDistrictBreakdown);
     $('indicatorDistrictFilter').addEventListener('change',renderIndicators);
     $('indicatorSearch').addEventListener('input',renderIndicators);
     $('indicatorDistrictFilter').addEventListener('change',renderCategorySummary);
