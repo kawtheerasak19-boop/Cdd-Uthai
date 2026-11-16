@@ -57,8 +57,13 @@
     .map-svg{filter:drop-shadow(0 12px 14px #6c31701e)}
     .district-shape{stroke:#22172e;stroke-width:5;stroke-linejoin:round;transition:fill .4s,filter .2s;filter:drop-shadow(0 0 0 transparent)}
     .district-shape:hover{stroke-width:7;filter:brightness(1.08) drop-shadow(0 6px 10px #6d326e6d)}
-    .district-depth{pointer-events:none;stroke:#3c2646;stroke-width:3.5;stroke-linejoin:round;filter:drop-shadow(0 5px 5px #57246855)}
+    .district-depth{pointer-events:none;stroke:#3c2646;stroke-width:3.5;stroke-linejoin:round;filter:drop-shadow(0 5px 5px #57246855);transition:transform .42s cubic-bezier(.2,.8,.2,1),filter .42s,opacity .35s;transform-origin:center;transform-box:fill-box}
+    .district-depth.selected-depth{transform:translateY(-7px) scale(1.01);filter:drop-shadow(0 18px 12px rgba(63,20,81,.34)) brightness(.88)}
     .district-text{stroke:#fffaff;stroke-width:9;fill:#24162f}.district-percent{fill:#5e267f;stroke:#fffaff;stroke-width:9}
+    .label-group{transition:transform .42s cubic-bezier(.2,.8,.2,1),filter .35s,opacity .35s;transform-origin:center;transform-box:fill-box}
+    .label-group.selected{transform:translateY(-20px) scale(1.03);filter:drop-shadow(0 10px 14px rgba(85,23,97,.28))}
+    .map-viewer .district-shape{outline:none;transform-origin:center;transform-box:fill-box}
+    .district-shape.selected{transform:translateY(-18px) scale(1.025);stroke-width:7;filter:brightness(1.08) drop-shadow(0 18px 18px rgba(102,39,139,.38)) drop-shadow(0 4px 0 rgba(255,255,255,.46))}
     .map-guide{background:linear-gradient(90deg,#fff,#fff7fd)}.rank-row:hover,.rank-row.selected{background:#fcf0fd}.rank-row{border-color:#f4e9f8}
     .rank-num{background:#f4eafa;color:#9252a0}.rank-percent{font-variant-numeric:tabular-nums}
     .rank-export,.small-label{background:#f5eafb;color:#8e46b5}.progress-track{background:#f1eaf3}
@@ -77,12 +82,12 @@
     .message.success{background:#eafff7;color:#13866f}.message.error{background:#fff0f3;color:#b72d55}
     @media(max-width:1100px){.indicator-layout,.import-layout{grid-template-columns:1fr}}@media(max-width:700px){.indicator-stats{grid-template-columns:1fr}.upload-box{min-height:170px;padding:18px}.nav button{font-size:12px}}
     /* V8: dimensional map motion with original SVG paths untouched */
-    .map-panel{overflow:visible;position:relative;z-index:2}.map-viewer{perspective:1500px;perspective-origin:50% 46%;overflow:visible;padding:13px 8px 22px;min-height:400px;position:relative}
-    .map-stage{transform-origin:50% 52%;transform-style:preserve-3d;transform:rotateX(0) rotateY(0) rotateZ(0) translateY(0) scale(1);transition:transform .9s cubic-bezier(.18,.77,.2,1),filter .9s;filter:drop-shadow(0 8px 7px rgba(110,46,127,.12));will-change:transform}
-    .map-viewer.lifted .map-stage{transform:translateY(-22px) rotateX(var(--map-rotate-x,16deg)) rotateY(var(--map-rotate-y,-6deg)) rotateZ(-1.4deg) scale(1.018);filter:drop-shadow(26px 45px 18px rgba(102,39,139,.27))}
+    .map-panel{overflow:visible;position:relative;z-index:2}.map-viewer{perspective:1800px;perspective-origin:50% 46%;overflow:visible;padding:13px 8px 22px;min-height:400px;position:relative;border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,.65),rgba(250,239,255,.52))}
+    .map-stage{transform-origin:50% 52%;transform-style:preserve-3d;transform:rotateX(0) rotateY(0) rotateZ(0) translateY(0) scale(1);transition:transform .9s cubic-bezier(.18,.77,.2,1),filter .9s;filter:drop-shadow(0 10px 10px rgba(110,46,127,.14));will-change:transform}
+    .map-viewer.lifted .map-stage{transform:translateY(-24px) rotateX(var(--map-rotate-x,18deg)) rotateY(var(--map-rotate-y,-8deg)) rotateZ(-1.6deg) scale(1.02);filter:drop-shadow(32px 48px 24px rgba(102,39,139,.30))}
     .map-viewer:after{content:"";position:absolute;z-index:-1;pointer-events:none;left:18%;right:18%;bottom:7%;height:13%;border-radius:50%;background:rgba(116,40,139,.16);filter:blur(22px);opacity:0;transition:opacity .7s}.map-viewer.lifted:after{opacity:1}.map-viewer.lifted{background:radial-gradient(ellipse at 55% 80%,rgba(204,140,232,.28),transparent 62%)}
     .map-controls{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:0 17px 10px}
-    .map-interaction-hint{font-size:12px;color:#82618e}.map-viewer .district-shape{outline:none}.map-viewer .district-shape:focus-visible{stroke:#7814b5;stroke-width:8}
+    .map-interaction-hint{font-size:12px;color:#82618e}.map-viewer .district-shape:focus-visible{stroke:#7814b5;stroke-width:8}
     .category-filter{border:1px solid #e9c9e8;border-radius:10px;padding:7px 9px;background:#fff9fd;color:#722e80;font:inherit;font-weight:700;max-width:240px}.category-dashboard{margin-top:18px}.category-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px;padding:17px}.category-tile{border:1px solid #e9d6f0;border-radius:16px;padding:16px 12px;background:linear-gradient(135deg,#fff9fd,#f7edff);min-width:0}.category-tile .n{font-weight:800;font-size:14px;color:#6f2a87;line-height:1.35;margin-bottom:8px}.category-tile .value{font-weight:800;color:#9a277b;font-size:23px;white-space:nowrap}.category-tile .people{color:#5d547c;font-size:13px;margin-top:5px;font-weight:700}.category-tile .covered{color:#9987a6;font-size:11px;margin-top:6px}.category-note{padding:0 19px 19px;margin:0;color:#806c88;font-size:12px}
     @media(max-width:1200px){.category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:700px){.map-viewer{min-height:180px;padding:6px 0}.map-viewer.lifted .map-stage{transform:translateY(-6px) rotateX(10deg) rotateY(-2deg) scale(.96)}.category-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px}}
     @media(prefers-reduced-motion:reduce){.map-stage{transition:none}}
@@ -97,7 +102,7 @@
       <div class="section-heading"><div><h2 id="datasetTitle">ข้อมูลความจำเป็นพื้นฐาน (จปฐ.) ปี พ.ศ. 2570</h2><p id="datasetSubtitle">แสดงความคืบหน้ารายอำเภอและเรียงอันดับจากมากไปน้อย</p></div><div class="action-row"><button class="btn" id="refreshBtn">⟳ ดึงข้อมูลล่าสุด</button><button class="btn primary" id="exportMapBtn">⬇ ส่งออกแผนที่ + Top 3</button></div></div>
       <div class="stats" id="statsGrid"><article class="stat"><div><div class="caption">ความคืบหน้ารวม</div><div class="number" id="totalPercent">0%</div><div class="sub">ยอดจัดเก็บที่ยืนยันแล้ว ÷ เป้าหมาย (ไม่รวมรอตรวจสอบ)</div></div><div class="symbol">📈</div></article><article class="stat"><div><div class="caption">ดำเนินการแล้ว</div><div class="number" id="totalDone">0</div><div class="sub" id="doneUnit">ครัวเรือน</div></div><div class="symbol">✅</div></article><article class="stat"><div><div class="caption">เป้าหมายการจัดเก็บ</div><div class="number" id="totalTarget">0</div><div class="sub" id="targetUnit">ครัวเรือน</div></div><div class="symbol">🎯</div></article><article class="stat"><div><div class="caption">อำเภอคืบหน้า ≥ 80%</div><div class="number" id="greenCount">0 / 8</div><div class="sub">ระดับสีเขียว</div></div><div class="symbol">🏆</div></article><article class="stat pending-stat" id="pendingStat"><div><div class="caption">ครัวเรือนรอตรวจสอบ</div><div class="number" id="totalPending">0</div><div class="sub">ยอดรวม 8 อำเภอ · ไม่รวมในเปอร์เซ็นต์</div></div><div class="symbol">🔎</div></article><article class="stat duplicate-stat" id="duplicateStat"><div><div class="caption">ตรวจสอบประชากรซ้ำแล้ว</div><div class="number" id="totalDuplicatePercent">0%</div><div class="sub" id="totalDuplicateSub">0 / 0 คน · คงเหลือ 0 คน</div></div><div class="symbol">👥</div></article></div>
       <div class="dashboard-grid">
-        <section class="panel map-panel"><div class="panel-hd"><div><h3>แผนที่ความคืบหน้าจังหวัดอุทัยธานี</h3><p>ขอบเขต 8 อำเภอเดิม · คลิกพื้นที่แผนที่เพื่อยกตัว 3 มิติและดูรายละเอียด</p></div><span class="small-label">8 อำเภอ</span></div><div class="map-body"><div class="map-viewer" id="mapViewer"><div class="map-stage" id="mapStage">
+        <section class="panel map-panel"><div class="panel-hd"><div><h3>แผนที่ความคืบหน้าจังหวัดอุทัยธานี</h3><p>ขอบเขต 8 อำเภอเดิม · คลิกเลือกอำเภอเพื่อให้อำเภอนั้นลอยตัวแบบ 3 มิติและดูรายละเอียด</p></div><span class="small-label">8 อำเภอ</span></div><div class="map-body"><div class="map-viewer" id="mapViewer"><div class="map-stage" id="mapStage">
           <svg id="districtMap" class="map-svg" viewBox="38 70 1400 996" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="แผนที่จังหวัดอุทัยธานี แสดง 8 อำเภอแบ่งด้วยเส้นขอบสีดำ">
             <defs><filter id="relief" x="-10%" y="-10%" width="120%" height="125%"><feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#729ac1" flood-opacity="0.24"/></filter></defs>
             <g id="mapShapes" filter="url(#relief)">
@@ -255,11 +260,11 @@
      $('datasetTitle').textContent=DATASETS[ds].title;$('doneUnit').textContent=unit;$('targetUnit').textContent=unit;$('statsGrid').classList.toggle('with-pending',ds==='jpt');$('pendingStat').hidden=ds!=='jpt';$('duplicateStat').hidden=ds!=='jpt';
     const totalT=ranked.reduce((t,r)=>t+Number(r.row.target||0),0),totalC=ranked.reduce((t,r)=>t+Number(r.row.completed||0),0),overall=totalT?totalC/totalT*100:0;
      $('totalPercent').textContent=pFmt(overall);$('totalDone').textContent=fmt(totalC);$('totalTarget').textContent=fmt(totalT);$('greenCount').textContent=ranked.filter(r=>r.value>=80).length+' / 8';$('totalPending').textContent=fmt(ds==='jpt'?ranked.reduce((sum,r)=>sum+Number(r.row.pendingReview||0),0):0);const dupT=ranked.reduce((sum,r)=>sum+Number(r.row.duplicateTarget||0),0),dupC=ranked.reduce((sum,r)=>sum+Number(r.row.duplicateResolved||0),0);$('totalDuplicatePercent').textContent=pFmt(dupT?dupC/dupT*100:0);$('totalDuplicateSub').textContent=fmt(dupC)+' / '+fmt(dupT)+' คน · คงเหลือ '+fmt(Math.max(0,dupT-dupC))+' คน'+(ranked.some(r=>Number(r.row.grossCompleted||0)>0)?' · รายงานพบซ้ำ '+fmt(ranked.reduce((sum,r)=>sum+Number(r.row.duplicatePersons||0),0))+' คน':'');
-    for(const d of DISTRICTS){const value=pct(getRow(ds,d.id)),path=$('shape-'+d.id),label=document.querySelector('[data-label="'+d.id+'"]');if(path){path.setAttribute('fill',color(value));path.classList.toggle('selected',d.id===state.selected);const depth=$('depth-'+d.id);if(depth)depth.setAttribute('fill',colorDepth(value));path.setAttribute('aria-label','อำเภอ'+d.name+' '+pFmt(value));}if(label){label.querySelector('.district-percent').textContent=pFmt(value);}}
+    for(const d of DISTRICTS){const value=pct(getRow(ds,d.id)),path=$('shape-'+d.id),label=document.querySelector('[data-label="'+d.id+'"]');if(path){const isSelected=d.id===state.selected;path.setAttribute('fill',color(value));path.classList.toggle('selected',isSelected);const depth=$('depth-'+d.id);if(depth){depth.setAttribute('fill',colorDepth(value));depth.classList.toggle('selected-depth',isSelected);depth.setAttribute('transform',isSelected?'translate(0 10) scale(1.01)':'translate(0 13)');}path.setAttribute('aria-label','อำเภอ'+d.name+' '+pFmt(value));}if(label){label.querySelector('.district-percent').textContent=pFmt(value);label.classList.toggle('selected',d.id===state.selected);}}
      $('rankingList').innerHTML=ranked.map((r,i)=>`<div class="rank-row ${r.id===state.selected?'selected':''}" data-rank-district="${r.id}" role="button" tabindex="0" aria-label="ดูรายละเอียดอำเภอ${escapeHTML(r.name)}"><span class="rank-num">${i+1}</span><div class="rank-middle"><div class="rank-name">อ.${escapeHTML(r.name)}</div><div class="rank-sub">${fmt(r.row.completed)} / ${fmt(r.row.target)} ${unit}${ds==='jpt'?`<span class="rank-await">🔎 รอตรวจสอบ ${fmt(r.row.pendingReview||0)} ครัวเรือน</span><span class="rank-duplicate">👥 ประชากรซ้ำ ${fmt(r.row.duplicateResolved||0)} / ${fmt(r.row.duplicateTarget||0)} คน (${pFmt(dupPct(r.row))})</span>`:''}</div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,r.value)}%;background:${color(r.value)}"></div></div></div><span class="rank-percent" style="color:${colorDark(r.value)}">${pFmt(r.value)}<small>${statusText(r.value)}</small></span><button type="button" class="rank-export" data-export-district="${r.id}" title="ส่งออกภาพรายอำเภอ" aria-label="ส่งออกภาพอำเภอ${escapeHTML(r.name)}">⬇</button></div>`).join('');
      const d=DISTRICTS.find(x=>x.id===state.selected)||DISTRICTS[0],r=getRow(ds,d.id),p=pct(r);$('detailName').textContent='อำเภอ'+d.name;$('detailPercent').textContent=pFmt(p);$('detailPercent').style.color=colorDark(p);$('detailMeta').textContent=`จัดเก็บแล้ว ${fmt(r.completed)} จากเป้าหมาย ${fmt(r.target)} ${unit}${ds==='jpt'?' · ครัวเรือนรอตรวจสอบ '+fmt(r.pendingReview||0)+(Number(r.grossCompleted||0)>0?' · ยอดดิบ '+fmt(r.grossCompleted):''):''} · อันดับ ${ranked.findIndex(x=>x.id===d.id)+1} / 8`;$('detailDuplicate').hidden=ds!=='jpt';$('detailDuplicateBar').style.width=dupPct(r)+'%';$('detailDuplicateText').textContent=`ประชากรซ้ำ ตรวจสอบแล้ว ${fmt(r.duplicateResolved||0)} / ${fmt(r.duplicateTarget||0)} คน (${pFmt(dupPct(r))}) · คงเหลือ ${fmt(Math.max(0,(r.duplicateTarget||0)-(r.duplicateResolved||0)))} คน${Number(r.grossCompleted||0)>0?' · ในรายงานพบซ้ำ '+fmt(r.duplicatePersons||0)+' คน และรอตรวจสอบ '+fmt(r.pendingPersons||0)+' คน':''}`;updateStatus();
   }
-  function selectDistrict(id){if(!DISTRICTS.some(d=>d.id===id))return;state.selected=id;if($('categoryDistrictFilter'))$('categoryDistrictFilter').value=id;render();liftMap(true);}
+  function selectDistrict(id){if(!DISTRICTS.some(d=>d.id===id))return;state.selected=id;if($('categoryDistrictFilter'))$('categoryDistrictFilter').value=id;render();liftMap(true);const path=$('shape-'+id);if(path){path.animate([{transform:'translateY(-6px) scale(1.01)'},{transform:'translateY(-24px) scale(1.03)'},{transform:'translateY(-18px) scale(1.025)'}],{duration:420,easing:'cubic-bezier(.22,.8,.2,1)'});} }
   async function verifyEditCode(code){
     if(!window.crypto?.subtle){throw new Error('เบราว์เซอร์ไม่รองรับการตรวจรหัส กรุณาเปิดผ่าน HTTPS หรืออัปเดต Chrome');}
     const bytes=new TextEncoder().encode(code),digest=await crypto.subtle.digest('SHA-256',bytes);
@@ -401,7 +406,7 @@
   function liftMap(active){
     const viewer=$('mapViewer'),button=$('map3dBtn');if(!viewer||!button)return;
     viewer.classList.toggle('lifted',active);button.setAttribute('aria-pressed',String(Boolean(active)));
-    button.textContent=active?'✦ แผนที่ลอยแบบ 3 มิติ':'✦ ยกแผนที่เป็น 3 มิติ';
+    button.textContent=active?'✦ มุมมอง 3 มิติเปิดอยู่':'✦ เปิดมุมมองแผนที่ 3 มิติ';
     if(!active){viewer.style.setProperty('--map-rotate-x','16deg');viewer.style.setProperty('--map-rotate-y','-6deg');}
   }
   function initMapInteraction(){
@@ -533,9 +538,9 @@
   };
   const normHeader=s=>String(s??'').trim().toLowerCase().replace(/[\s\-()（）._%]/g,'');
   function getTableKeys(rows){
-    let headerIndex=rows.findIndex(r=>Array.isArray(r)&&r.filter(x=>String(x??'').trim()).length>=2);
+    let headerIndex=rows.findIndex(r=>rowCells(r).filter(x=>String(x??'').trim()).length>=2);
     if(headerIndex<0)throw new Error('ไม่พบหัวตารางใน Excel');
-    const raw=rows[headerIndex].map(normHeader),keys={};
+    const raw=rowCells(rows[headerIndex]).map(normHeader),keys={};
     for(const [key,aliases] of Object.entries(headerAlias)){
       const i=raw.findIndex(h=>aliases.some(a=>normHeader(a)===h));if(i>=0)keys[key]=i;
     }
@@ -546,6 +551,15 @@
   function isCellValue(v){return v!==undefined&&v!==null&&String(v).trim()!=='';}
   function parsedCount(value,desc){const raw=String(value).trim().replace(/,/g,'');const n=Number(raw);if(!Number.isSafeInteger(n)||n<0||n>100000000)throw new Error(desc+' ต้องเป็นจำนวนเต็มตั้งแต่ 0 ถึง 100,000,000');return n;}
   function getSheet(workbook,preferred){return Object.keys(workbook).find(n=>normHeader(n)===normHeader(preferred));}
+  function rowCells(row){
+    if(Array.isArray(row))return row;
+    if(row===undefined||row===null)return [];
+    if(typeof row==='object'){
+      if(Array.isArray(row.values))return row.values;
+      return Object.keys(row).sort((a,b)=>String(a).localeCompare(String(b),undefined,{numeric:true})).map(k=>row[k]);
+    }
+    return [row];
+  }
   // รองรับรายงานจริงของกรมการพัฒนาชุมชน: ชีต Table, หัวตารางแถว 4, C–J
   const OFFICIAL_REPORT_HEADERS={
     target:'เป้าหมายการจัดเก็บ',gross:'ผลการจัดเก็บ (คร.)',duplicateH:'ปชก. ซ้ำ (คร.)',
@@ -554,7 +568,7 @@
   };
   function officialHeader(rows){
     for(let i=0;i<Math.min(rows.length,20);i++){
-      const r=(rows[i]||[]).map(normHeader),h={};
+      const r=rowCells(rows[i]).map(normHeader),h={};
       for(const [k,v] of Object.entries(OFFICIAL_REPORT_HEADERS))h[k]=r.indexOf(normHeader(v));
       h.district=r.indexOf(normHeader('อำเภอ'));
       if(Object.values(h).every(v=>v>=0))return {index:i,fields:h};
@@ -565,7 +579,7 @@
     const match=officialHeader(rows);if(!match)throw new Error('รูปแบบรายงาน จปฐ. ไม่ตรงหัวตารางที่กำหนด');
     const {index,fields:h}=match,progress=[],notes=[],used=new Set();
     for(let i=index+1;i<rows.length;i++){
-      const row=rows[i]||[],rawName=String(row[h.district]??'').trim();
+      const row=rowCells(rows[i]),rawName=String(row[h.district]??'').trim();
       if(!rawName||rawName==='รวม'||rawName.startsWith('รวม'))continue;
       const district=mapDistrict(rawName);
       if(!district){if(row.some((v,j)=>j>=h.target&&isCellValue(v)))throw new Error('แถว '+(i+1)+' ไม่รู้จักชื่ออำเภอ: '+rawName);continue;}
@@ -611,7 +625,7 @@
       const rows=workbook[progressSheet],{headerIndex,keys:h}=getTableKeys(rows);
       if(h.ds===undefined||h.district===undefined||h.target===undefined)throw new Error('ชีตความคืบหน้าต้องมีหัวข้อ ประเภทข้อมูล, อำเภอ, เป้าหมาย');
       for(let i=headerIndex+1;i<rows.length;i++){
-        const row=rows[i]||[],get=k=>row[h[k]];
+        const row=rowCells(rows[i]),get=k=>row[h[k]];
         const relevant=['target','completed','percent','pendingReview','duplicateTarget','duplicateResolved'].filter(k=>h[k]!==undefined&&isCellValue(get(k)));
         if(!relevant.length)continue;
         const district=mapDistrict(get('district')),ds=mapDataset(get('ds'));
@@ -636,7 +650,7 @@
       const rows=workbook[indicatorSheet],{headerIndex,keys:h}=getTableKeys(rows);
       if(h.district===undefined||h.indicatorId===undefined||h.failedCount===undefined)throw new Error('ชีตตัวชี้วัดที่ตกต้องมีหัวข้อ อำเภอ, ตัวชี้วัด, จำนวนไม่ผ่าน');
       for(let i=headerIndex+1;i<rows.length;i++){
-        const row=rows[i]||[];if(!isCellValue(row[h.failedCount]))continue;
+        const row=rowCells(rows[i]);if(!isCellValue(row[h.failedCount]))continue;
         const district=mapDistrict(row[h.district]),indicatorId=parsedCount(row[h.indicatorId],'หมายเลขตัวชี้วัดแถว '+(i+1)),failedCount=parsedCount(row[h.failedCount],'จำนวนไม่ผ่านแถว '+(i+1));
         if(!district||indicatorId<1||indicatorId>38)throw new Error('ชีตตัวชี้วัดที่ตก แถว '+(i+1)+': ต้องเป็นอำเภอที่ถูกต้องและตัวชี้วัด 1–38');
         const key=district+'|'+indicatorId;if(usedIndicators.has(key))throw new Error('ตัวชี้วัดซ้ำในไฟล์: '+key);usedIndicators.add(key);
