@@ -58,12 +58,12 @@
     .district-shape{stroke:#22172e;stroke-width:5;stroke-linejoin:round;transition:fill .4s,filter .2s;filter:drop-shadow(0 0 0 transparent)}
     .district-shape:hover{stroke-width:7;filter:brightness(1.08) drop-shadow(0 6px 10px #6d326e6d)}
     .district-depth{pointer-events:none;stroke:#3c2646;stroke-width:3.5;stroke-linejoin:round;filter:drop-shadow(0 5px 5px #57246855);transition:transform .42s cubic-bezier(.2,.8,.2,1),filter .42s,opacity .35s;transform-origin:center;transform-box:fill-box}
-    .district-depth.selected-depth{transform:translateY(-7px) scale(1.01);filter:drop-shadow(0 18px 12px rgba(63,20,81,.34)) brightness(.88)}
+    .district-depth.selected-depth{filter:drop-shadow(0 6px 7px rgba(63,20,81,.34)) brightness(.88)}
     .district-text{stroke:#fffaff;stroke-width:9;fill:#24162f}.district-percent{fill:#5e267f;stroke:#fffaff;stroke-width:9}
     .label-group{transition:transform .42s cubic-bezier(.2,.8,.2,1),filter .35s,opacity .35s;transform-origin:center;transform-box:fill-box}
-    .label-group.selected{transform:translateY(-20px) scale(1.03);filter:drop-shadow(0 10px 14px rgba(85,23,97,.28))}
+    .label-group.selected{filter:drop-shadow(0 2px 5px rgba(85,23,97,.3))}
     .map-viewer .district-shape{outline:none;transform-origin:center;transform-box:fill-box}
-    .district-shape.selected{transform:translateY(-18px) scale(1.025);stroke-width:7;filter:brightness(1.08) drop-shadow(0 18px 18px rgba(102,39,139,.38)) drop-shadow(0 4px 0 rgba(255,255,255,.46))}
+    .district-shape.selected{stroke-width:7;filter:brightness(1.065) drop-shadow(0 5px 10px rgba(102,39,139,.22))}
     .map-guide{background:linear-gradient(90deg,#fff,#fff7fd)}.rank-row:hover,.rank-row.selected{background:#fcf0fd}.rank-row{border-color:#f4e9f8}
     .rank-num{background:#f4eafa;color:#9252a0}.rank-percent{font-variant-numeric:tabular-nums}
     .rank-export,.small-label{background:#f5eafb;color:#8e46b5}.progress-track{background:#f1eaf3}
@@ -91,6 +91,19 @@
     .category-filter{border:1px solid #e9c9e8;border-radius:10px;padding:7px 9px;background:#fff9fd;color:#722e80;font:inherit;font-weight:700;max-width:240px}.category-dashboard{margin-top:18px}.category-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px;padding:17px}.category-tile{border:1px solid #e9d6f0;border-radius:16px;padding:16px 12px;background:linear-gradient(135deg,#fff9fd,#f7edff);min-width:0}.category-tile .n{font-weight:800;font-size:14px;color:#6f2a87;line-height:1.35;margin-bottom:8px}.category-tile .value{font-weight:800;color:#9a277b;font-size:23px;white-space:nowrap}.category-tile .people{color:#5d547c;font-size:13px;margin-top:5px;font-weight:700}.category-tile .covered{color:#9987a6;font-size:11px;margin-top:6px}.category-note{padding:0 19px 19px;margin:0;color:#806c88;font-size:12px}
     @media(max-width:1200px){.category-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:700px){.map-viewer{min-height:180px;padding:6px 0}.map-viewer.lifted .map-stage{transform:translateY(-6px) rotateX(10deg) rotateY(-2deg) scale(.96)}.category-grid{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px}}
     @media(prefers-reduced-motion:reduce){.map-stage{transition:none}}
+
+    /* V10: floating districts and vector terrain; original 8 path d-values unchanged. */
+    .district-wrap{transform:translateY(0);transform-box:view-box;transition:transform .56s cubic-bezier(.19,.85,.21,1),filter .44s;filter:drop-shadow(0 3px 3px rgba(54,26,82,.14))}
+    .district-wrap.active{transform:translateY(-29px);filter:drop-shadow(4px 24px 15px rgba(72,20,108,.40))}
+    .district-wrap.active .district-shape{stroke:#281838;stroke-width:7.3;filter:brightness(1.08)}
+    .district-wrap .district-depth{stroke-width:2.7;stroke:#392549;opacity:.64;filter:none;transition:opacity .32s}
+    .district-wrap.active .district-depth{opacity:.92}
+    .district-scene{pointer-events:none;opacity:.86;transition:opacity .3s}
+    .district-wrap.active .district-scene{opacity:1}
+    .map-svg{overflow:visible}
+    .map-viewer:before{content:'';position:absolute;inset:12% 8% 6%;pointer-events:none;border-radius:28px;background:radial-gradient(ellipse at 50% 63%,rgba(189,114,234,.14),transparent 67%);z-index:0}
+    .map-guide .legend span{font-weight:800}
+    @media(prefers-reduced-motion:reduce){.district-wrap,.label-group{transition:none!important}}
   </style>
 </head>
 <body>
@@ -140,8 +153,8 @@
       <section class="panel form-panel" style="margin-top:18px"><div class="panel-head-row"><div><h3>ตารางตัวชี้วัด 1–38</h3><p class="lead">“—” คือยังไม่มีข้อมูลรายงาน ไม่ใช่ศูนย์</p></div><input id="indicatorSearch" class="ind-search" type="search" placeholder="ค้นหาหมายเลขตัวชี้วัด" aria-label="ค้นหาตัวชี้วัด"></div><div class="table-scroll"><table class="data-table"><thead><tr><th>ตัวชี้วัด</th><th>จำนวนไม่ผ่าน</th><th>สถานะรายงาน</th></tr></thead><tbody id="indicatorTableBody"></tbody></table></div></section>
     </section>
     <section class="page" id="importPage" aria-label="นำเข้าข้อมูล PDF และ Excel">
-      <div class="section-heading"><div><h2>📥 อัปเดตความคืบหน้าและผลตกเกณฑ์จาก PDF / Excel</h2><p>นำเข้าไฟล์ .xlsx มาตรฐาน ตรวจสอบก่อนบันทึก และอัปเดต Google Sheets ให้ทุกเครื่องเห็นข้อมูลเดียวกัน</p></div><div class="action-row"><a class="btn primary" href="template_uthai_2570.xlsx" download>⬇ ดาวน์โหลดแบบฟอร์ม Excel</a></div></div>
-      <div class="import-layout"><section class="panel form-panel"><h3>1. เลือกไฟล์ PDF หรือ Excel</h3><p class="lead">รองรับ <b>รายงานสรุปผลข้อมูล จปฐ. ระดับอำเภอ (PDF) 1–8 ไฟล์พร้อมกัน</b> ตามตัวอย่างอำเภอทัพทัน และ <b>รายงานความคืบหน้าความจำเป็นพื้นฐาน จปฐ.</b> จากระบบราชการโดยตรง (ชีต Table, หัวตารางแถว 4) และแบบฟอร์มเดิมสำหรับ กชช. 2ค/ตัวชี้วัดที่ตก ระบบจะใช้ <b>ผลการจัดเก็บสุทธิ</b> จากรายงานเป็นยอดคำนวณเปอร์เซ็นต์</p><label class="upload-box" id="uploadDrop" for="excelFile"><span class="upload-glyph">📑</span><b>คลิกเลือก PDF รายอำเภอ 1–8 ไฟล์ หรือ Excel</b><span>PDF หลายอำเภอพร้อมกัน (.pdf) หรือ Excel (.xlsx/.csv) ครั้งละ 1 ไฟล์</span><input id="excelFile" type="file" multiple accept=".pdf,.xlsx,.csv,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"></label><p class="hint">ระบบอ่าน PDF ที่มีชั้นข้อความ (PDF จากระบบรายงาน) ภายในเบราว์เซอร์ ไม่รองรับ PDF ภาพสแกน · จะบันทึกเฉพาะยอดไม่ผ่านตัวชี้วัดลง Google Sheets ไม่อัปเดตยอดจัดเก็บหลัก</p><div class="form-actions" style="margin-top:16px"><button class="btn primary" id="previewImportBtn" type="button">🔍 ตรวจสอบข้อมูลในไฟล์</button><button class="btn green" id="commitImportBtn" type="button" disabled>☁️ ยืนยันบันทึกลง Google Sheets</button></div><div id="importMessage" class="message" role="status"></div></section><aside class="panel side-info"><h3>ข้อมูลที่นำเข้าได้</h3><ol class="steps"><li><b>ความคืบหน้า:</b> เลือก จปฐ. หรือ กชช. 2ค กรอกเป้าหมายและยอดจัดเก็บของแต่ละอำเภอ</li><li><b>จปฐ. เพิ่มเติม:</b> ครัวเรือนรอตรวจสอบ จำนวนประชากรซ้ำทั้งหมด และตรวจสอบแล้ว</li><li><b>PDF จากระบบ จปฐ.:</b> เลือกรายงานอำเภอได้สูงสุด 8 ไฟล์พร้อมกัน ระบบอ่านตัวชี้วัด 1–38 ตามหน่วยนับและตรวจชื่ออำเภอ</li><li><b>ตัวชี้วัดที่ตกจาก Excel:</b> กรอกหมายเลข 1–38 และจำนวนไม่ผ่านรายอำเภอ (0 = รายงานว่าไม่พบปัญหา)</li><li><b>ตรวจสอบก่อนส่ง:</b> เว็บจะแสดงจำนวนแถวและตัวอย่างที่กำลังจะอัปเดต แล้วจึงกดยืนยัน</li></ol><div class="tip">⚠️ ระบบนี้ไม่ใช้ PIN ตามที่กำหนด ผู้ที่ทราบ Web App URL และเข้าถึงได้อาจแก้ข้อมูล จึงควรจำกัดการเผยแพร่ลิงก์ ห้ามนำเข้ารายชื่อหรือข้อมูลส่วนบุคคล</div></aside></div>
+      <div class="section-heading"><div><h2>📥 อัปเดตความคืบหน้าและผลตกเกณฑ์จาก PDF / Excel</h2><p>เลือก PDF, Excel และ CSV พร้อมกันได้หลายไฟล์ ตรวจสอบก่อนบันทึก และอัปเดต Google Sheets ให้ทุกเครื่องเห็นข้อมูลเดียวกัน</p></div><div class="action-row"><a class="btn primary" href="template_uthai_2570.xlsx" download>⬇ ดาวน์โหลดแบบฟอร์ม Excel</a></div></div>
+      <div class="import-layout"><section class="panel form-panel"><h3>1. เลือกไฟล์ PDF หรือ Excel</h3><p class="lead">รองรับ <b>รายงานสรุปผลข้อมูล จปฐ. ระดับอำเภอ (PDF) 1–8 ไฟล์พร้อมกัน</b> ตามตัวอย่างอำเภอทัพทัน และ <b>รายงานความคืบหน้าความจำเป็นพื้นฐาน จปฐ.</b> จากระบบราชการโดยตรง (ชีต Table, หัวตารางแถว 4) และแบบฟอร์มเดิมสำหรับ กชช. 2ค/ตัวชี้วัดที่ตก ระบบจะใช้ <b>ผลการจัดเก็บสุทธิ</b> จากรายงานเป็นยอดคำนวณเปอร์เซ็นต์</p><label class="upload-box" id="uploadDrop" for="excelFile"><span class="upload-glyph">📑</span><b>เลือกไฟล์ PDF, Excel หรือ CSV ได้พร้อมกัน</b><span>เลือก PDF / Excel / CSV ผสมกันได้สูงสุด 16 ไฟล์ต่อครั้ง (ไม่เกิน 8 PDF)</span><input id="excelFile" type="file" multiple accept=".pdf,.xlsx,.csv,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"></label><p class="hint">ระบบอ่าน PDF ที่มีชั้นข้อความ (PDF จากระบบรายงาน) ภายในเบราว์เซอร์ ไม่รองรับ PDF ภาพสแกน · จะบันทึกเฉพาะยอดไม่ผ่านตัวชี้วัดลง Google Sheets ไม่อัปเดตยอดจัดเก็บหลัก</p><div class="form-actions" style="margin-top:16px"><button class="btn primary" id="previewImportBtn" type="button">🔍 ตรวจสอบข้อมูลในไฟล์</button><button class="btn green" id="commitImportBtn" type="button" disabled>☁️ ยืนยันบันทึกลง Google Sheets</button></div><div id="importMessage" class="message" role="status"></div></section><aside class="panel side-info"><h3>ข้อมูลที่นำเข้าได้</h3><ol class="steps"><li><b>ความคืบหน้า:</b> เลือก จปฐ. หรือ กชช. 2ค กรอกเป้าหมายและยอดจัดเก็บของแต่ละอำเภอ</li><li><b>จปฐ. เพิ่มเติม:</b> ครัวเรือนรอตรวจสอบ จำนวนประชากรซ้ำทั้งหมด และตรวจสอบแล้ว</li><li><b>PDF จากระบบ จปฐ.:</b> เลือกรายงานอำเภอได้สูงสุด 8 ไฟล์พร้อมกัน ระบบอ่านตัวชี้วัด 1–38 ตามหน่วยนับและตรวจชื่ออำเภอ</li><li><b>ตัวชี้วัดที่ตกจาก Excel:</b> กรอกหมายเลข 1–38 และจำนวนไม่ผ่านรายอำเภอ (0 = รายงานว่าไม่พบปัญหา)</li><li><b>ตรวจสอบก่อนส่ง:</b> เว็บจะแสดงจำนวนแถวและตัวอย่างที่กำลังจะอัปเดต แล้วจึงกดยืนยัน</li></ol><div class="tip">⚠️ ระบบต้องใช้รหัสผู้ดูแลเพื่อบันทึกข้อมูล ผู้ที่ทราบรหัสแก้ไขและลิงก์ Web App สามารถแก้ไขข้อมูลได้ จึงควรจำกัดการเผยแพร่ลิงก์ ห้ามนำเข้ารายชื่อหรือข้อมูลส่วนบุคคล</div></aside></div>
       <div id="importPreview" class="panel form-panel" hidden style="margin-top:17px"><h3>2. ตรวจสอบก่อนบันทึก</h3><p id="importPreviewSummary" class="lead"></p><div class="table-scroll"><table class="data-table"><thead><tr><th>ประเภท</th><th>อำเภอ</th><th>รายละเอียดที่จะบันทึก</th></tr></thead><tbody id="importPreviewBody"></tbody></table></div><p id="importPreviewNote" class="hint"></p></div>
     </section>
     <section class="page" id="settingsPage" aria-label="สถานะ Google Apps Script"><div class="section-heading"><div><h2>⚙️ ตรวจสอบการเชื่อมต่อ Google Apps Script</h2><p>เว็บทุกเครื่องใช้ URL กลางเดียวกันที่กำหนดอยู่ในไฟล์ index.html</p></div></div><div class="settings-layout"><div class="panel form-panel"><h3>Google Apps Script ที่ใช้เป็นฐานข้อมูลกลาง</h3><p class="lead">ฝังลิงก์ Web App ลงในเว็บไซต์แล้ว ไม่ต้องใช้ไฟล์ config.js หรือกรอกลิงก์ใหม่ในแต่ละเครื่อง</p><form id="settingsForm"><div class="field"><label for="apiUrlInput">Google Apps Script Web App URL (ลิงก์กลาง)</label><input id="apiUrlInput" type="url" spellcheck="false" autocomplete="off" readonly aria-readonly="true"><span class="hint">ระบบใช้ลิงก์นี้เสมอ แม้เครื่องนั้นเคยบันทึกลิงก์เก่าไว้ หากต้องการเปลี่ยนภายหลัง ให้แก้ค่า DEFAULT_API_URL ใน index.html แล้วอัปโหลดไฟล์ใหม่บน GitHub</span></div><div class="form-actions"><button class="btn primary" type="submit">🧪 ทดสอบการเชื่อมต่อ</button></div><div class="message" id="settingsMessage" role="status"></div></form><div class="diagnostic" id="diagnosticHelp">หากเชื่อมต่อไม่สำเร็จ ให้ตรวจสอบว่า Google Apps Script ที่ URL นี้ Deploy เป็น Web App รุ่นล่าสุด และบัญชีผู้ Deploy ได้รัน <b>setupProject</b> พร้อมกำหนด <b>EDIT_PASSWORD</b> ใน Script Properties แล้ว</div><hr class="divider"><h3>สถานะระบบ</h3><p id="settingsStatus" class="lead" style="margin-bottom:0">กำลังตรวจสอบข้อมูลออนไลน์</p></div><aside class="panel side-info"><h3>วิธีดูข้อมูลตรงกันทุกเครื่อง</h3><ol class="steps"><li>อัปโหลด <span class="code">index.html</span> รุ่นใหม่นี้ไปแทนไฟล์เดิมบน GitHub Pages</li><li>ไม่ต้องอัปโหลด <span class="code">config.js</span> อีกต่อไป (ลบไฟล์เก่าออกได้)</li><li>เปิดเว็บไซต์บนอุปกรณ์อื่น แล้วกด Ctrl + F5 เพื่อโหลดไฟล์ล่าสุด</li><li>ตรวจสอบสถานะฐานข้อมูลและรุ่นข้อมูลว่าตรงกัน โดยเว็บดึงยอดใหม่ทุก 30 วินาที</li></ol><div class="tip">ℹ️ การฝังลิงก์ในหน้าเว็บช่วยให้ทุกเครื่องใช้ Google Apps Script ปลายทางเดียวกัน หากเปลี่ยน Deploy ให้พยายามอัปเดต deployment เดิมเพื่อรักษา URL และใช้ Google Sheets เดิม</div></aside></div></section>
@@ -260,11 +273,34 @@
      $('datasetTitle').textContent=DATASETS[ds].title;$('doneUnit').textContent=unit;$('targetUnit').textContent=unit;$('statsGrid').classList.toggle('with-pending',ds==='jpt');$('pendingStat').hidden=ds!=='jpt';$('duplicateStat').hidden=ds!=='jpt';
     const totalT=ranked.reduce((t,r)=>t+Number(r.row.target||0),0),totalC=ranked.reduce((t,r)=>t+Number(r.row.completed||0),0),overall=totalT?totalC/totalT*100:0;
      $('totalPercent').textContent=pFmt(overall);$('totalDone').textContent=fmt(totalC);$('totalTarget').textContent=fmt(totalT);$('greenCount').textContent=ranked.filter(r=>r.value>=80).length+' / 8';$('totalPending').textContent=fmt(ds==='jpt'?ranked.reduce((sum,r)=>sum+Number(r.row.pendingReview||0),0):0);const dupT=ranked.reduce((sum,r)=>sum+Number(r.row.duplicateTarget||0),0),dupC=ranked.reduce((sum,r)=>sum+Number(r.row.duplicateResolved||0),0);$('totalDuplicatePercent').textContent=pFmt(dupT?dupC/dupT*100:0);$('totalDuplicateSub').textContent=fmt(dupC)+' / '+fmt(dupT)+' คน · คงเหลือ '+fmt(Math.max(0,dupT-dupC))+' คน'+(ranked.some(r=>Number(r.row.grossCompleted||0)>0)?' · รายงานพบซ้ำ '+fmt(ranked.reduce((sum,r)=>sum+Number(r.row.duplicatePersons||0),0))+' คน':'');
-    for(const d of DISTRICTS){const value=pct(getRow(ds,d.id)),path=$('shape-'+d.id),label=document.querySelector('[data-label="'+d.id+'"]');if(path){const isSelected=d.id===state.selected;path.setAttribute('fill',color(value));path.classList.toggle('selected',isSelected);const depth=$('depth-'+d.id);if(depth){depth.setAttribute('fill',colorDepth(value));depth.classList.toggle('selected-depth',isSelected);depth.setAttribute('transform',isSelected?'translate(0 10) scale(1.01)':'translate(0 13)');}path.setAttribute('aria-label','อำเภอ'+d.name+' '+pFmt(value));}if(label){label.querySelector('.district-percent').textContent=pFmt(value);label.classList.toggle('selected',d.id===state.selected);}}
+    for(const d of DISTRICTS){
+      const value=pct(getRow(ds,d.id)),path=$('shape-'+d.id),wrapper=$('district-wrap-'+d.id),label=document.querySelector('[data-label="'+d.id+'"]');
+      if(path){path.setAttribute('fill',color(value));path.classList.toggle('selected',d.id===state.selected);path.setAttribute('aria-label','อำเภอ'+d.name+' '+pFmt(value));}
+      if(wrapper){wrapper.classList.toggle('active',d.id===state.selected);
+        for(const layer of wrapper.querySelectorAll('.district-depth'))layer.setAttribute('fill',colorDepth(value));
+      }
+      if(label){label.querySelector('.district-percent').textContent=pFmt(value);label.classList.toggle('selected',d.id===state.selected);
+        const original=label.dataset.baseTransform||label.getAttribute('transform');
+        if(!label.dataset.baseTransform)label.dataset.baseTransform=original;
+        const match=original.match(/^translate\(\s*([\d.]+)[ ,]+([\d.]+)\s*\)$/);
+        if(match)label.setAttribute('transform','translate('+match[1]+' '+(Number(match[2])-(d.id===state.selected?29:0))+')');
+      }
+    }
+    // The selected region is painted above adjacent regions, while ALL labels remain
+    // in a separate upper SVG layer so every district name and percent remains readable.
+    const selectedWrapper=$('district-wrap-'+state.selected);
+    if(selectedWrapper&&selectedWrapper.parentNode)selectedWrapper.parentNode.appendChild(selectedWrapper);
+
      $('rankingList').innerHTML=ranked.map((r,i)=>`<div class="rank-row ${r.id===state.selected?'selected':''}" data-rank-district="${r.id}" role="button" tabindex="0" aria-label="ดูรายละเอียดอำเภอ${escapeHTML(r.name)}"><span class="rank-num">${i+1}</span><div class="rank-middle"><div class="rank-name">อ.${escapeHTML(r.name)}</div><div class="rank-sub">${fmt(r.row.completed)} / ${fmt(r.row.target)} ${unit}${ds==='jpt'?`<span class="rank-await">🔎 รอตรวจสอบ ${fmt(r.row.pendingReview||0)} ครัวเรือน</span><span class="rank-duplicate">👥 ประชากรซ้ำ ${fmt(r.row.duplicateResolved||0)} / ${fmt(r.row.duplicateTarget||0)} คน (${pFmt(dupPct(r.row))})</span>`:''}</div><div class="progress-track"><div class="progress-fill" style="width:${Math.min(100,r.value)}%;background:${color(r.value)}"></div></div></div><span class="rank-percent" style="color:${colorDark(r.value)}">${pFmt(r.value)}<small>${statusText(r.value)}</small></span><button type="button" class="rank-export" data-export-district="${r.id}" title="ส่งออกภาพรายอำเภอ" aria-label="ส่งออกภาพอำเภอ${escapeHTML(r.name)}">⬇</button></div>`).join('');
      const d=DISTRICTS.find(x=>x.id===state.selected)||DISTRICTS[0],r=getRow(ds,d.id),p=pct(r);$('detailName').textContent='อำเภอ'+d.name;$('detailPercent').textContent=pFmt(p);$('detailPercent').style.color=colorDark(p);$('detailMeta').textContent=`จัดเก็บแล้ว ${fmt(r.completed)} จากเป้าหมาย ${fmt(r.target)} ${unit}${ds==='jpt'?' · ครัวเรือนรอตรวจสอบ '+fmt(r.pendingReview||0)+(Number(r.grossCompleted||0)>0?' · ยอดดิบ '+fmt(r.grossCompleted):''):''} · อันดับ ${ranked.findIndex(x=>x.id===d.id)+1} / 8`;$('detailDuplicate').hidden=ds!=='jpt';$('detailDuplicateBar').style.width=dupPct(r)+'%';$('detailDuplicateText').textContent=`ประชากรซ้ำ ตรวจสอบแล้ว ${fmt(r.duplicateResolved||0)} / ${fmt(r.duplicateTarget||0)} คน (${pFmt(dupPct(r))}) · คงเหลือ ${fmt(Math.max(0,(r.duplicateTarget||0)-(r.duplicateResolved||0)))} คน${Number(r.grossCompleted||0)>0?' · ในรายงานพบซ้ำ '+fmt(r.duplicatePersons||0)+' คน และรอตรวจสอบ '+fmt(r.pendingPersons||0)+' คน':''}`;updateStatus();
   }
-  function selectDistrict(id){if(!DISTRICTS.some(d=>d.id===id))return;state.selected=id;if($('categoryDistrictFilter'))$('categoryDistrictFilter').value=id;render();liftMap(true);const path=$('shape-'+id);if(path){path.animate([{transform:'translateY(-6px) scale(1.01)'},{transform:'translateY(-24px) scale(1.03)'},{transform:'translateY(-18px) scale(1.025)'}],{duration:420,easing:'cubic-bezier(.22,.8,.2,1)'});} }
+  function selectDistrict(id){
+    if(!DISTRICTS.some(d=>d.id===id))return;
+    state.selected=id;
+    if($('categoryDistrictFilter'))$('categoryDistrictFilter').value=id;
+    render();liftMap(true);
+  }
+
   async function verifyEditCode(code){
     if(!window.crypto?.subtle){throw new Error('เบราว์เซอร์ไม่รองรับการตรวจรหัส กรุณาเปิดผ่าน HTTPS หรืออัปเดต Chrome');}
     const bytes=new TextEncoder().encode(code),digest=await crypto.subtle.digest('SHA-256',bytes);
@@ -345,7 +381,7 @@
   function roundRect(ctx,x,y,w,h,r,fill){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill()}
   function drawCategoryExport(ctx,ids,x,y,width,compact=false){
     const cats=categoryTotals(ids);const titleSize=compact?29:33;
-    canvasText(ctx,'ครัวเรือนตกเกณฑ์ แยก 5 ด้าน (ตัวชี้วัด จปฐ.)',x,y,titleSize,'#692976');
+    canvasText(ctx,'ยอดตกเกณฑ์รายด้าน (หน่วย ครัวเรือน / คน)',x,y,titleSize,'#692976');
     const top=y+22,gap=compact?14:13,w=(width-gap*4)/5,h=compact?150:145;
     cats.forEach((c,i)=>{
       const bx=x+i*(w+gap);roundRect(ctx,bx,top,w,h,15,i%2?'#f7f0ff':'#fff1fa');
@@ -363,6 +399,13 @@
     const btn=$('exportMapBtn');btn.disabled=true;
     try{
       const svg=$('districtMap').cloneNode(true);svg.setAttribute('width','1400');svg.setAttribute('height','996');
+      // Export a clean, flat overview regardless of which district was floating on screen.
+      for(const wrap of svg.querySelectorAll('.district-wrap'))wrap.classList.remove('active');
+      for(const label of svg.querySelectorAll('.label-group')){
+        if(label.dataset.baseTransform)label.setAttribute('transform',label.dataset.baseTransform);
+        label.classList.remove('selected');
+      }
+
       for(const el of svg.querySelectorAll('.district-shape')){el.removeAttribute('class');el.setAttribute('stroke','#162536');el.setAttribute('stroke-width','4.5');el.setAttribute('stroke-linejoin','round');}
       for(const label of svg.querySelectorAll('.district-text')){label.setAttribute('font-family','Tahoma,Arial,sans-serif');label.setAttribute('font-weight','bold');label.setAttribute('font-size',label.classList.contains('district-percent')?'32':label.querySelector('tspan')?'29':'31');label.setAttribute('text-anchor','middle');label.setAttribute('fill',label.classList.contains('district-percent')?'#154c7d':'#11243a');label.setAttribute('stroke','#fff');label.setAttribute('stroke-width','8');label.setAttribute('paint-order','stroke');}
       const xml=new XMLSerializer().serializeToString(svg),url=URL.createObjectURL(new Blob([xml],{type:'image/svg+xml;charset=utf-8'})),img=new Image();
@@ -419,17 +462,75 @@
       v.style.setProperty('--map-rotate-x',(16-ny*5).toFixed(1)+'deg');v.style.setProperty('--map-rotate-y',(-6+nx*10).toFixed(1)+'deg');
     });
   }
+
   function initMapDepth(){
-    const g=$('mapShapes');if(!g||$('mapDepth'))return;
-    const ns='http://www.w3.org/2000/svg';const depth=document.createElementNS(ns,'g');depth.id='mapDepth';depth.setAttribute('aria-hidden','true');
-    for(const p of g.querySelectorAll('.district-shape')){
-      const clone=p.cloneNode(false);clone.id='depth-'+p.dataset.district;
-      clone.setAttribute('class','district-depth');clone.setAttribute('transform','translate(0 13)');
-      clone.removeAttribute('tabindex');clone.removeAttribute('role');clone.removeAttribute('data-district');clone.removeAttribute('aria-label');clone.setAttribute('fill','#9b6d91');depth.appendChild(clone);
+    const root=$('mapShapes'),svg=$('districtMap');
+    if(!root||$('district-wrap-banrai'))return;
+    const ns='http://www.w3.org/2000/svg',defs=svg.querySelector('defs');
+    const el=(tag,attrs,parent)=>{
+      const n=document.createElementNS(ns,tag);
+      for(const [k,v] of Object.entries(attrs||{}))n.setAttribute(k,String(v));
+      if(parent)parent.appendChild(n);
+      return n;
+    };
+    // These are illustrative buildings, tree stands and technology marks, not GPS positions.
+    const terrain={
+      banrai:{forest:[[234,700],[353,630],[468,794],[740,911],[710,730]],buildings:[[612,768]],signal:[[400,787]]},
+      lansak:{forest:[[405,270],[480,365],[540,480]],buildings:[[700,505],[626,335]],signal:[[742,412]]},
+      sawang:{forest:[[825,260],[1069,279]],buildings:[[1016,328]],signal:[[905,344]]},
+      thap:{forest:[[867,432],[1041,459]],buildings:[[1091,403]],signal:[[929,476]]},
+      nongchang:{forest:[[817,562],[1027,603]],buildings:[[960,630]],signal:[[999,549]]},
+      huay:{forest:[[520,658],[755,705]],buildings:[[577,683]],signal:[[789,673]]},
+      nongkhayang:{forest:[[1117,628],[1251,670]],buildings:[[1194,687]],signal:[[1230,635]]},
+      mueang:{forest:[[1180,483],[1347,588]],buildings:[[1240,530],[1372,610]],signal:[[1326,654]]}
+    };
+    if(!$('mapTechPattern')){
+      const pattern=el('pattern',{id:'mapTechPattern',width:'55',height:'55',patternUnits:'userSpaceOnUse'},defs);
+      el('path',{d:'M55 0H0V55',fill:'none',stroke:'#ffffff','stroke-width':'1.2',opacity:'.36'},pattern);
+      el('path',{d:'M9 17H31L37 23H49 M17 9V32H36',fill:'none',stroke:'#ffffff','stroke-width':'1.6',opacity:'.40'},pattern);
+      el('circle',{cx:49,cy:23,r:2,fill:'#ffffff',opacity:'.50'},pattern);
+      el('circle',{cx:17,cy:9,r:2,fill:'#ffffff',opacity:'.50'},pattern);
     }
-    g.parentNode.insertBefore(depth,g);
-    const drop=$('relief');if(drop){const f=drop.querySelector('feDropShadow');if(f){f.setAttribute('flood-color','#984d91');f.setAttribute('flood-opacity','0.28');f.setAttribute('dy','6');}}
+    const paths=Array.from(root.querySelectorAll(':scope > .district-shape'));
+    paths.forEach(path=>{
+      const id=path.dataset.district,shapeD=path.getAttribute('d');
+      const wrapper=el('g',{id:'district-wrap-'+id,class:'district-wrap','data-district':id},root);
+      const clip=el('clipPath',{id:'district-clip-'+id,clipPathUnits:'userSpaceOnUse'},defs);
+      el('path',{d:shapeD},clip);
+      // Each region has a bevel/extrusion, built from the exact original outline.
+      for(let depth=7;depth>=1;depth--){
+        const layer=el('path',{class:'district-depth',d:shapeD,transform:'translate(0 '+(depth*1.9)+')',fill:'#715274','pointer-events':'none','aria-hidden':'true'},wrapper);
+        layer.style.opacity=String(.23+depth*.075);
+      }
+      wrapper.appendChild(path);
+      const scenery=el('g',{class:'district-scene','clip-path':'url(#district-clip-'+id+')','pointer-events':'none','aria-hidden':'true'},wrapper);
+      el('path',{d:shapeD,fill:'url(#mapTechPattern)',opacity:'.43'},scenery);
+      const art=terrain[id]||{forest:[],buildings:[],signal:[]};
+      art.forest.forEach(([x,y],i)=>{
+        const t=el('g',{transform:'translate('+x+' '+y+') scale('+(i%2?1.12:1)+')'},scenery);
+        el('ellipse',{cx:0,cy:13,rx:17,ry:5,fill:'#285a51',opacity:'.28'},t);
+        el('rect',{x:-2.5,y:0,width:5,height:16,rx:1,fill:'#71434b'},t);
+        el('path',{d:'M0 -23 L-17 1 L-9 1 L-22 9 L22 9 L9 1 L17 1 Z',fill:'#157f68',stroke:'#edfff6','stroke-width':1.4,opacity:'.92'},t);
+        el('path',{d:'M0 -23 L0 9 L20 9 L10 0 L16 0 Z',fill:'#55c5a0',opacity:'.66'},t);
+      });
+      art.buildings.forEach(([x,y],i)=>{
+        const b=el('g',{transform:'translate('+x+' '+y+') scale('+(i%2?.86:1)+')'},scenery);
+        el('ellipse',{cx:0,cy:15,rx:27,ry:6,fill:'#50295f',opacity:'.21'},b);
+        el('rect',{x:-20,y:-14,width:40,height:28,rx:3,fill:'#fef5ff',stroke:'#613879','stroke-width':2.6},b);
+        el('path',{d:'M-25 -14 L0 -33 L25 -14 Z',fill:'#7757c6',stroke:'#ebd8ff','stroke-width':1.8},b);
+        for(let w=0;w<3;w++)el('rect',{x:-14+w*11,y:-5,width:6,height:9,rx:1,fill:'#5e8acb'},b);
+        el('rect',{x:-3,y:2,width:6,height:12,fill:'#ad7a9c'},b);
+      });
+      art.signal.forEach(([x,y])=>{
+        const sig=el('g',{transform:'translate('+x+' '+y+')'},scenery);
+        el('circle',{cx:0,cy:0,r:3.8,fill:'#fffcff',stroke:'#802caf','stroke-width':1},sig);
+        el('path',{d:'M0 -13V-4 M0 4V13 M-13 0H-4 M4 0H13',stroke:'#fff',opacity:'.72','stroke-width':1.7,'stroke-linecap':'round'},sig);
+        el('circle',{cx:0,cy:0,r:18,stroke:'#ffffff',opacity:'.34','stroke-dasharray':'4 5','stroke-width':1.3,fill:'none'},sig);
+      });
+    });
+    const drop=$('relief');if(drop){const f=drop.querySelector('feDropShadow');if(f){f.setAttribute('flood-color','#8b439f');f.setAttribute('flood-opacity','0.17');f.setAttribute('dy','4');}}
   }
+
   function renderIndicators(){
     if(!$('indicatorTableBody'))return;
     const filter=$('indicatorDistrictFilter').value||'all';
@@ -662,17 +763,32 @@
     return result;
   }
   // PDF text-layer reader. Only outputs summarized failures by district; file bytes never leave browser.
-  const PDFJS_SRC='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-  const PDFJS_WORKER='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  let pdfJsLoading=null;
+  // Load PDF.js with CDN fallbacks. Excel/CSV parsing does NOT rely on PDF.js.
+  const PDFJS_SOURCES=[
+    ['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js','https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'],
+    ['https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js','https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'],
+    ['https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js','https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js']
+  ];
+  let pdfJsLoading=null,pdfWorkerUrl=PDFJS_SOURCES[0][1];
   function ensurePdfJs(){
     if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);
-    if(!pdfJsLoading)pdfJsLoading=new Promise((resolve,reject)=>{
-      const tag=document.createElement('script');tag.src=PDFJS_SRC;tag.async=true;
-      tag.onload=()=>window.pdfjsLib?resolve(window.pdfjsLib):reject(new Error('โหลดโปรแกรมอ่าน PDF ไม่สำเร็จ'));
-      tag.onerror=()=>reject(new Error('ไม่สามารถโหลด PDF.js ได้ กรุณาตรวจสอบอินเทอร์เน็ตหรือใช้งานผ่าน HTTPS'));
-      document.head.appendChild(tag);
-    }).catch(err=>{pdfJsLoading=null;throw err});
+    if(!pdfJsLoading)pdfJsLoading=(async()=>{
+      for(const [scriptUrl,workerUrl] of PDFJS_SOURCES){
+        try{
+          await new Promise((resolve,reject)=>{
+            const tag=document.createElement('script');let settled=false;
+            const finish=(err)=>{if(settled)return;settled=true;clearTimeout(timer);if(err){tag.remove();reject(err);}else resolve();};
+            const timer=setTimeout(()=>finish(new Error('timeout')),7000);
+            tag.src=scriptUrl;tag.async=true;
+            tag.onload=()=>finish(window.pdfjsLib?null:new Error('ไม่พบตัวอ่าน PDF'));
+            tag.onerror=()=>finish(new Error('โหลดไม่ได้'));
+            document.head.appendChild(tag);
+          });
+          if(window.pdfjsLib){pdfWorkerUrl=workerUrl;return window.pdfjsLib;}
+        }catch(e){/* Try the next CDN; show one understandable error if all fail. */}
+      }
+      throw new Error('โหลดตัวอ่าน PDF ไม่ได้จากทั้ง 3 แหล่ง ตรวจสอบอินเทอร์เน็ตและส่วนขยายที่บล็อก CDN หรือใช้ไฟล์ Excel ที่ระบบรองรับ');
+    })().catch(err=>{pdfJsLoading=null;throw err;});
     return pdfJsLoading;
   }
   // The 6 report columns are at 270 / 330 / 390 / 440 / 490 / 535 on a 595-pt page.
@@ -714,7 +830,7 @@
     return district.id;
   }
   async function readIndicatorPdf(file){
-    const pdfjs=await ensurePdfJs();pdfjs.GlobalWorkerOptions.workerSrc=PDFJS_WORKER;
+    const pdfjs=await ensurePdfJs();pdfjs.GlobalWorkerOptions.workerSrc=pdfWorkerUrl;
     if(file.size>15*1024*1024)throw new Error(file.name+': ไฟล์ PDF ใหญ่เกิน 15 MB');
     const pdf=await pdfjs.getDocument({data:new Uint8Array(await file.arrayBuffer()),useSystemFonts:true}).promise;
     try{
@@ -736,47 +852,82 @@
       return {district,rows};
     } finally {await pdf.destroy();}
   }
+
   async function readPdfImport(files){
-    if(files.length<1||files.length>8)throw new Error('เลือก PDF รายอำเภอ 1–8 ไฟล์ต่อครั้ง');
+    if(files.length<1||files.length>8)throw new Error('เลือก PDF ระดับอำเภอได้ครั้งละ 1–8 ไฟล์');
     const districts=new Set(),indicators=[],notes=[];
     for(const file of files){
-      if(!/\.pdf$/i.test(file.name))throw new Error('หากเลือกหลายไฟล์ ต้องเป็น PDF ทั้งหมด');
       const result=await readIndicatorPdf(file);
-      if(districts.has(result.district))throw new Error('รายงาน PDF อำเภอซ้ำ: '+result.district);
+      if(districts.has(result.district))throw new Error('มี PDF อำเภอซ้ำกัน: '+DISTRICTS.find(d=>d.id===result.district).name);
       districts.add(result.district);
       indicators.push(...result.rows.map(r=>({district:result.district,indicatorId:r.indicatorId,failedCount:r.failedCount})));
-      const d=DISTRICTS.find(x=>x.id===result.district);
-      notes.push('อ.'+d.name+': อ่านครบ 38 ตัวชี้วัด');
+      notes.push('อ.'+DISTRICTS.find(d=>d.id===result.district).name+' อ่านครบ 38 ข้อ');
     }
     return {source:'official-jpt-pdf',progress:[],indicators,notes,pdfDistricts:[...districts]};
   }
-
-  async function loadImportFile(){
-    const files=Array.from($('excelFile').files),file=files[0];if(!file)throw new Error('กรุณาเลือก PDF หรือ Excel ก่อน');
-    if(files.length>1||/\.pdf$/i.test(file.name))return await readPdfImport(files);
-    if(files.length!==1)throw new Error('Excel ให้นำเข้าครั้งละ 1 ไฟล์');
-    if(file.size>12*1024*1024)throw new Error('ไฟล์ต้องมีขนาดไม่เกิน 12 MB');
+  async function readSpreadsheetImport(file){
+    if(file.size>12*1024*1024)throw new Error('ไฟล์ Excel/CSV ใหญ่เกิน 12 MB');
+    let workbook;
     if(/\.csv$/i.test(file.name)){
-      const rows=parseCsv((await file.text()).replace(/^\uFEFF/,''));const first=getTableKeys(rows);
-      const name=first.keys.indicatorId!==undefined?'ตัวชี้วัดที่ตก':'ความคืบหน้า';return {[name]:rows};
+      const rows=parseCsv((await file.text()).replace(/^\uFEFF/,'')),first=getTableKeys(rows);
+      const name=first.keys.indicatorId!==undefined?'ตัวชี้วัดที่ตก':'ความคืบหน้า';
+      workbook={[name]:rows};
+    }else if(/\.xlsx$/i.test(file.name)){
+      workbook=await readXlsxWorkbook(file);
+    }else throw new Error('ชนิดไฟล์ Excel ไม่ถูกต้อง รองรับ .xlsx หรือ .csv');
+    return parseWorkbookForImport(workbook);
+  }
+  async function loadImportDraft(){
+    const files=Array.from($('excelFile').files||[]);
+    if(!files.length)throw new Error('กรุณาเลือก PDF, Excel หรือ CSV ก่อน');
+    if(files.length>16)throw new Error('เลือกไฟล์ได้สูงสุด 16 ไฟล์ต่อครั้ง');
+    const pdfs=files.filter(f=>/\.pdf$/i.test(f.name));
+    if(pdfs.length>8)throw new Error('รายงาน PDF เลือกได้สูงสุด 8 อำเภอต่อครั้ง');
+    const invalid=files.filter(f=>!/\.(pdf|xlsx|csv)$/i.test(f.name));
+    if(invalid.length)throw new Error('ไฟล์ '+invalid[0].name+' ไม่รองรับ กรุณาใช้ .pdf / .xlsx / .csv');
+    const result={source:'combined',progress:[],indicators:[],notes:[],pdfDistricts:[]};
+    const progressKeys=new Set(),indicatorKeys=new Set(),kinds=new Set();
+    for(let i=0;i<files.length;i++){
+      const file=files[i];
+      showMessage($('importMessage'),'กำลังอ่านไฟล์ '+(i+1)+'/'+files.length+': '+file.name);
+      let draft;
+      try{draft=/\.pdf$/i.test(file.name)?await readPdfImport([file]):await readSpreadsheetImport(file);}
+      catch(err){throw new Error('ไฟล์ '+file.name+': '+String(err.message||err));}
+      kinds.add(draft.source);
+      for(const p of draft.progress){
+        const key=p.dataset+'|'+p.district;
+        if(progressKeys.has(key))throw new Error('พบข้อมูลความคืบหน้าอำเภอซ้ำจากหลายไฟล์: '+p.district+' ('+file.name+')');
+        progressKeys.add(key);result.progress.push(p);
+      }
+      for(const v of draft.indicators){
+        const key=v.district+'|'+v.indicatorId;
+        if(indicatorKeys.has(key))throw new Error('ตัวชี้วัดที่ '+v.indicatorId+' ของอำเภอ '+v.district+' ซ้ำกันในหลายไฟล์ ('+file.name+')');
+        indicatorKeys.add(key);result.indicators.push(v);
+      }
+      result.notes.push(file.name+' ✓ '+(draft.notes||[]).join(', '));
+      for(const d of draft.pdfDistricts||[])if(!result.pdfDistricts.includes(d))result.pdfDistricts.push(d);
     }
-    if(!/\.xlsx$/i.test(file.name))throw new Error('รองรับไฟล์รายงาน .xlsx แบบ จปฐ. และไฟล์แบบฟอร์ม .xlsx/.csv เท่านั้น');
-    return readXlsxWorkbook(file);
+    if(!result.progress.length&&!result.indicators.length)throw new Error('ไม่พบข้อมูลที่นำเข้าได้');
+    // Must respect the existing Apps Script bulk API limits.
+    if(result.progress.length>16||result.indicators.length>304)
+      throw new Error('ข้อมูลรวมเกินข้อจำกัด Google Apps Script (ความคืบหน้า 16 แถว / ตัวชี้วัด 304 แถว) กรุณาแบ่งอัปโหลดเป็น 2 รอบ');
+    if(kinds.size===1)result.source=[...kinds][0];
+    return result;
   }
   function showImportPreview(draft){
     $('importPreview').hidden=false;
-    $('importPreviewSummary').textContent=draft.source==='official-jpt-pdf'?`PDF รายงานสรุปผล จปฐ. ${draft.pdfDistricts.length}/8 อำเภอ · ${draft.indicators.length} ตัวชี้วัด · ไม่ปรับเปอร์เซ็นต์การจัดเก็บ`:draft.source==='official-jpt'?`รายงาน จปฐ. มาตรฐาน · อัปเดตผลสุทธิ ${draft.progress.length} อำเภอ · ไม่รวมแถวรวมจังหวัด`:`เตรียมอัปเดตความคืบหน้า ${draft.progress.length} รายการ และตัวชี้วัดที่ตก ${draft.indicators.length} รายการ`;
+    $('importPreviewSummary').textContent=draft.source==='official-jpt-pdf'?`PDF รายงาน จปฐ. ${draft.pdfDistricts.length}/8 อำเภอ · ${draft.indicators.length} ตัวชี้วัด · ไม่ปรับยอดจัดเก็บหลัก`:draft.source==='official-jpt'?`Excel รายงาน จปฐ. · อัปเดตผลสุทธิ ${draft.progress.length} อำเภอ`:`เตรียมอัปเดตความคืบหน้า ${draft.progress.length} รายการ และตัวชี้วัดที่ตก ${draft.indicators.length} รายการ จากไฟล์ที่เลือก`;
     let shown=0;const list=[];
     for(const r of draft.progress){const d=DISTRICTS.find(x=>x.id===r.district);list.push(`<tr><td>${r.dataset==='jpt'?'จปฐ.':'กชช. 2ค'}</td><td>อ.${escapeHTML(d.name)}</td><td>เป้าหมาย ${fmt(r.target)} · จัดเก็บ ${fmt(r.completed)} (${pFmt(r.target?r.completed/r.target*100:0)})${r.dataset==='jpt'?' · รอตรวจสอบ '+fmt(r.pendingReview):''}${draft.source==='official-jpt'?' · ดิบ '+fmt(r.grossCompleted)+' · ซ้ำ '+fmt(r.duplicateHouseholds)+' คร. / '+fmt(r.duplicatePersons)+' คน':''}</td></tr>`);shown++;}
     for(const r of draft.indicators.slice(0,draft.source==='official-jpt-pdf'?40:25)){const d=DISTRICTS.find(x=>x.id===r.district);list.push(`<tr><td>ตัวชี้วัดที่ ${r.indicatorId}</td><td>อ.${escapeHTML(d.name)}</td><td>ไม่ผ่าน ${fmt(r.failedCount)} รายการ</td></tr>`);shown++;}
     $('importPreviewBody').innerHTML=list.join('');
-    $('importPreviewNote').textContent=(draft.source==='official-jpt-pdf'?'รายงานตรวจพบ: '+draft.notes.join(' · ')+' · รายการที่แสดงเป็นเพียงตัวอย่าง ส่วนระบบจะบันทึกครบทุกตัวชี้วัดที่อ่านได้':draft.indicators.length>25?'แสดงตัวชี้วัดตัวอย่าง 25 รายการจาก '+draft.indicators.length+' รายการ โดยบันทึกครบทุกแถวที่ผ่านการตรวจสอบ':(draft.notes.join(' · ')||'ตรวจสอบอำเภอและตัวเลขก่อนกดยืนยันเพื่อบันทึกลง Google Sheets'));
+    $('importPreviewNote').textContent=(draft.notes.join(' · ')+' · ตารางด้านบนแสดงเพียงบางรายการ โดยระบบจะบันทึกทุกแถวที่ตรวจสอบผ่าน (ผลตัวชี้วัดไม่เปลี่ยนเปอร์เซ็นต์จัดเก็บหลัก)');
     $('commitImportBtn').disabled=!(state.apiUrl&&state.mode==='online');
     if(state.mode!=='online')showMessage($('importMessage'),'ตรวจสอบไฟล์แล้ว แต่ยังไม่ได้เชื่อมต่อ Google Sheets กรุณาเชื่อมต่อในเมนูตั้งค่าและโหลดข้อมูลล่าสุดก่อนบันทึก','error');
     else showMessage($('importMessage'),'อ่านไฟล์สำเร็จ ตรวจสอบรายการด้านล่างก่อนกดยืนยัน','success');
   }
   async function previewImport(){const btn=$('previewImportBtn');btn.disabled=true;state.importDraft=null;$('commitImportBtn').disabled=true;$('importPreview').hidden=true;
-    try{const workbook=await loadImportFile(),draft=parseWorkbookForImport(workbook);state.importDraft=draft;showImportPreview(draft);}
+    try{const draft=await loadImportDraft();state.importDraft=draft;showImportPreview(draft);}
     catch(err){showMessage($('importMessage'),'นำเข้าไม่ได้: '+String(err.message||err),'error');}
     finally{btn.disabled=false;}
   }
@@ -797,7 +948,7 @@
           if(state.lastBulkRequestId===requestId){state.data=data;verified=true;break;}
         }catch(err){lastError=String(err.message||err);}
       }
-      if(!verified)throw new Error('ยังตรวจยืนยันรายการนำเข้าจาก Google Sheets ไม่ได้ ตรวจสอบ Code.gs เวอร์ชัน 6 และ Apps Script → Executions '+lastError);
+      if(!verified)throw new Error('ยังตรวจยืนยันรายการนำเข้าจาก Google Sheets ไม่ได้ ตรวจสอบ Code.gs รุ่นปัจจุบันและ Apps Script → Executions '+lastError);
       state.mode='online';state.lastSync=new Intl.DateTimeFormat('th-TH',{hour:'2-digit',minute:'2-digit'}).format(new Date());storeData();render();state.importDraft=null;
       showMessage($('importMessage'),`✓ บันทึกและอ่านกลับสำเร็จ: ความคืบหน้า ${draft.progress.length} รายการ · ตัวชี้วัด ${draft.indicators.length} รายการ`,'success');
     }catch(err){showMessage($('importMessage'),String(err.message||err),'error');}
