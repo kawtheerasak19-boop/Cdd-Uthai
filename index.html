@@ -787,55 +787,99 @@
     }
     return [row];
   }
-  // รองรับรายงานจริงของกรมการพัฒนาชุมชน: ชีต Table, หัวตารางแถว 4, C–J
+  // รองรับทั้งไฟล์ต้นแบบ Dashboard และรายงานส่งออกจริงจากระบบ จปฐ.
+  // รายงานจริงบางรุ่นใช้ชีต Table / ความคืบหน้า และไม่มีคอลัมน์ "ประเภทข้อมูล"
+  // จึงตรวจจากหัวคอลัมน์รายงานจริงก่อน แล้วค่อยใช้รูปแบบไฟล์ต้นแบบ
   const OFFICIAL_REPORT_HEADERS={
     target:'เป้าหมายการจัดเก็บ',gross:'ผลการจัดเก็บ (คร.)',duplicateH:'ปชก. ซ้ำ (คร.)',
     duplicateP:'ปชก. ซ้ำ (คน)',pendingH:'ปชก. รอตรวจสอบ (คร.)',pendingP:'ปชก. รอตรวจสอบ (คน)',
     net:'ผลการจัดเก็บสุทธิ (คร.)',percent:'ร้อยละ'
   };
+  const OFFICIAL_REPORT_ALIASES={
+    district:['อำเภอ','ชื่ออำเภอ','district'],
+    dataset:['ประเภทข้อมูล','ชุดข้อมูล','dataset','เมนู'],
+    target:['เป้าหมายการจัดเก็บ','เป้าหมาย','จำนวนเป้าหมาย','ครัวเรือนเป้าหมาย','target'],
+    gross:['ผลการจัดเก็บ (คร.)','ผลการจัดเก็บ','จำนวนผลการจัดเก็บ','จำนวนจัดเก็บ','จัดเก็บแล้ว'],
+    duplicateH:['ปชก. ซ้ำ (คร.)','ประชากรซ้ำ (คร.)','จำนวนประชากรซ้ำ (คร.)','ครัวเรือนซ้ำ'],
+    duplicateP:['ปชก. ซ้ำ (คน)','ประชากรซ้ำ (คน)','จำนวนประชากรซ้ำ (คน)'],
+    pendingH:['ปชก. รอตรวจสอบ (คร.)','ครัวเรือนรอตรวจสอบ','จำนวนครัวเรือนรอตรวจสอบ','รอตรวจสอบ (คร.)'],
+    pendingP:['ปชก. รอตรวจสอบ (คน)','ประชากรรอตรวจสอบ (คน)','จำนวนประชากรรอตรวจสอบ'],
+    net:['ผลการจัดเก็บสุทธิ (คร.)','ผลการจัดเก็บสุทธิ','จำนวนจัดเก็บสุทธิ','จัดเก็บสุทธิ'],
+    percent:['ร้อยละ','เปอร์เซ็นต์','เปอร์เซ็นต์ความคืบหน้า','ความคืบหน้า (%)','ความคืบหน้า']
+  };
+  function findHeaderIndex(normalizedRow,aliases){
+    return normalizedRow.findIndex(h=>aliases.some(a=>normHeader(a)===h));
+  }
   function officialHeader(rows){
-    for(let i=0;i<Math.min(rows.length,20);i++){
+    for(let i=0;i<Math.min(rows.length,30);i++){
       const r=rowCells(rows[i]).map(normHeader),h={};
-      for(const [k,v] of Object.entries(OFFICIAL_REPORT_HEADERS))h[k]=r.indexOf(normHeader(v));
-      h.district=r.indexOf(normHeader('อำเภอ'));
-      if(Object.values(h).every(v=>v>=0))return {index:i,fields:h};
+      for(const [k,aliases] of Object.entries(OFFICIAL_REPORT_ALIASES))h[k]=findHeaderIndex(r,aliases);
+      const hasDistrict=h.district>=0,hasTarget=h.target>=0;
+      if(h.dataset>=0)continue; // ชีตต้นแบบที่มีประเภทข้อมูลให้ใช้ตัวอ่านมาตรฐาน
+      const hasProgressColumn=h.net>=0||h.gross>=0||h.percent>=0;
+      const hasJptExtra=h.pendingH>=0||h.pendingP>=0||h.duplicateH>=0||h.duplicateP>=0;
+      // ต้องมีชื่ออำเภอ + เป้าหมาย + ผลจัดเก็บ/ร้อยละ และมีลักษณะรายงาน จปฐ.
+      if(hasDistrict&&hasTarget&&hasProgressColumn&&(hasJptExtra||h.net>=0||h.gross>=0))
+        return {index:i,fields:h};
     }
     return null;
   }
   function parseOfficialJptReport(rows){
-    const match=officialHeader(rows);if(!match)throw new Error('รูปแบบรายงาน จปฐ. ไม่ตรงหัวตารางที่กำหนด');
+    const match=officialHeader(rows);if(!match)throw new Error('ไม่พบหัวตารางรายงาน จปฐ. กรุณาตรวจชื่อคอลัมน์อำเภอและเป้าหมาย');
     const {index,fields:h}=match,progress=[],notes=[],used=new Set();
+    const cell=(row,key)=>h[key]>=0?row[h[key]]:undefined;
+    const optionalNumber=(row,key,desc)=>h[key]>=0&&isCellValue(cell(row,key))?parsedCount(cell(row,key),desc):0;
     for(let i=index+1;i<rows.length;i++){
-      const row=rowCells(rows[i]),rawName=String(row[h.district]??'').trim();
+      const row=rowCells(rows[i]),rawName=String(cell(row,'district')??'').trim();
       if(!rawName||rawName==='รวม'||rawName.startsWith('รวม'))continue;
       const district=mapDistrict(rawName);
-      if(!district){if(row.some((v,j)=>j>=h.target&&isCellValue(v)))throw new Error('แถว '+(i+1)+' ไม่รู้จักชื่ออำเภอ: '+rawName);continue;}
+      if(!district){
+        const relevant=[h.target,h.gross,h.net,h.percent,h.pendingH,h.duplicateH].filter(x=>x>=0);
+        if(relevant.some(j=>isCellValue(row[j])))throw new Error('แถว '+(i+1)+' ไม่รู้จักชื่ออำเภอ: '+rawName);
+        continue;
+      }
       if(used.has(district))throw new Error('อำเภอซ้ำในรายงาน: '+rawName);used.add(district);
-      const numeric=(key)=>parsedCount(row[h[key]],'แถว '+(i+1)+' '+OFFICIAL_REPORT_HEADERS[key]);
-      const target=numeric('target'),grossCompleted=numeric('gross'),duplicateHouseholds=numeric('duplicateH'),duplicatePersons=numeric('duplicateP');
-      const pendingReview=numeric('pendingH'),pendingPersons=numeric('pendingP'),completed=numeric('net');
+      const target=parsedCount(cell(row,'target'),'แถว '+(i+1)+' '+OFFICIAL_REPORT_HEADERS.target);
+      const grossCompleted=optionalNumber(row,'gross','แถว '+(i+1)+' '+OFFICIAL_REPORT_HEADERS.gross);
+      const duplicateHouseholds=optionalNumber(row,'duplicateH','แถว '+(i+1)+' '+OFFICIAL_REPORT_HEADERS.duplicateH);
+      const duplicatePersons=optionalNumber(row,'duplicateP','แถว '+(i+1)+' '+OFFICIAL_REPORT_HEADERS.duplicateP);
+      const pendingReview=optionalNumber(row,'pendingH','แถว '+(i+1)+' '+OFFICIAL_REPORT_HEADERS.pendingH);
+      const pendingPersons=optionalNumber(row,'pendingP','แถว '+(i+1)+' '+OFFICIAL_REPORT_HEADERS.pendingP);
+      let completed;
+      if(h.net>=0&&isCellValue(cell(row,'net')))completed=parsedCount(cell(row,'net'),'แถว '+(i+1)+' '+OFFICIAL_REPORT_HEADERS.net);
+      else if(h.gross>=0&&isCellValue(cell(row,'gross')))completed=Math.max(0,grossCompleted-duplicateHouseholds-pendingReview);
+      else if(h.percent>=0&&isCellValue(cell(row,'percent'))){
+        const per=Number(String(cell(row,'percent')).replace(/,/g,'').replace(/%/g,''));
+        if(!Number.isFinite(per)||per<0||per>100)throw new Error('เปอร์เซ็นต์แถว '+(i+1)+' ต้องอยู่ในช่วง 0–100');
+        completed=Math.round(target*per/100);
+        notes.push('แถว '+(i+1)+' คำนวณผลจัดเก็บจากร้อยละ เนื่องจากไม่มีคอลัมน์ผลสุทธิ');
+      }else throw new Error('แถว '+(i+1)+' ไม่มีผลการจัดเก็บสุทธิหรือผลการจัดเก็บ');
       if(completed>target)throw new Error('แถว '+(i+1)+' ผลจัดเก็บสุทธิเกินเป้าหมาย');
-      const derived=grossCompleted-duplicateHouseholds-pendingReview;
-      if(derived!==completed)notes.push('แถว '+(i+1)+' ผลสุทธิในรายงานไม่ตรงกับการหักครัวเรือนซ้ำ/รอตรวจสอบ (ใช้ค่าคอลัมน์ I ตามรายงาน)');
-      const percentCell=row[h.percent];
-      if(isCellValue(percentCell)){
-        const printed=Number(String(percentCell).replace(/,/g,'').replace(/%/g,''));
+      if(h.gross>=0&&isCellValue(cell(row,'gross'))){
+        const derived=grossCompleted-duplicateHouseholds-pendingReview;
+        if(derived!==completed&&h.net>=0&&isCellValue(cell(row,'net')))
+          notes.push('แถว '+(i+1)+' ผลสุทธิไม่ตรงกับผลดิบหักครัวเรือนซ้ำ/รอตรวจสอบ (ใช้คอลัมน์ผลสุทธิ)');
+      }
+      if(h.percent>=0&&isCellValue(cell(row,'percent'))){
+        const printed=Number(String(cell(row,'percent')).replace(/,/g,'').replace(/%/g,''));
         const calculated=target?completed/target*100:0;
-        if(Number.isFinite(printed)&&Math.abs(printed-calculated)>0.06)notes.push('แถว '+(i+1)+' ร้อยละในคอลัมน์ J ต่างจากค่าคำนวณจากผลสุทธิ');
+        if(Number.isFinite(printed)&&Math.abs(printed-calculated)>0.06)notes.push('แถว '+(i+1)+' ร้อยละในรายงานต่างจากค่าคำนวณจากผลสุทธิ');
       }
       const old=getRow('jpt',district);
-      // รายงานแสดงจำนวนคนซ้ำที่พบ ไม่ได้แสดงจำนวนที่ตรวจสอบเสร็จแล้ว
-      // จึงเก็บตัวนับความคืบหน้าการตรวจสอบซ้ำเดิมไว้ ไม่สร้างยอดตรวจสอบเสร็จขึ้นเอง
+      // รายงานแสดงจำนวนคนซ้ำที่พบ ไม่ใช่จำนวนที่ตรวจสอบแล้ว จึงคงค่าความคืบหน้าตรวจสอบซ้ำเดิมไว้
       progress.push({dataset:'jpt',district,target,completed,pendingReview,
         duplicateTarget:old.duplicateTarget||0,duplicateResolved:old.duplicateResolved||0,
-        grossCompleted,duplicateHouseholds,duplicatePersons,pendingPersons});
+        grossCompleted:h.gross>=0?grossCompleted:completed+duplicateHouseholds+pendingReview,
+        duplicateHouseholds,duplicatePersons,pendingPersons});
     }
     if(!progress.length)throw new Error('ไม่พบข้อมูลอำเภอในรายงาน จปฐ.');
-    notes.unshift('อ่านรายงาน จปฐ. มาตรฐาน '+progress.length+' อำเภอ · ใช้ผลสุทธิคอลัมน์ I · ไม่รวมแถวรวมจังหวัด');
+    notes.unshift('อ่านรายงาน จปฐ. '+progress.length+' อำเภอ · รองรับหัวตารางรายงานส่งออกจริง · ไม่รวมแถวรวมจังหวัด');
+    if(h.pendingH<0)notes.push('ไฟล์ไม่มีคอลัมน์ครัวเรือนรอตรวจสอบ จึงคงค่าเดิมในฐานข้อมูล');
+    if(h.duplicateH<0||h.duplicateP<0)notes.push('ไฟล์ไม่มีคอลัมน์ประชากรซ้ำ จึงคงข้อมูลเดิมในฐานข้อมูล');
     notes.push('ยอดประชากรซ้ำในรายงานเป็นจำนวนที่พบ ไม่ใช่จำนวนที่ตรวจสอบแล้ว');
     return {progress,indicators:[],notes,source:'official-jpt'};
   }
-  function parseWorkbookForImport(workbook){
+  function parseWorkbookForImport(workbook,meta={}){
     const keys=Object.keys(workbook);
     const preferredProgress=getSheet(workbook,'ความคืบหน้า');const preferredIndicators=getSheet(workbook,'ตัวชี้วัดที่ตก');
     const officialSheet=keys.find(name=>officialHeader(workbook[name]));
@@ -850,27 +894,52 @@
     if(keys.length===1){const obj=getTableKeys(workbook[keys[0]]);if(obj.keys.indicatorId!==undefined&&obj.keys.failedCount!==undefined)indicatorSheet=keys[0];else progressSheet=keys[0];}
     if(progressSheet){
       const rows=workbook[progressSheet],{headerIndex,keys:h}=getTableKeys(rows);
-      if(h.ds===undefined||h.district===undefined||h.target===undefined)throw new Error('ชีตความคืบหน้าต้องมีหัวข้อ ประเภทข้อมูล, อำเภอ, เป้าหมาย');
-      for(let i=headerIndex+1;i<rows.length;i++){
-        const row=rowCells(rows[i]),get=k=>row[h[k]];
-        const relevant=['target','completed','percent','pendingReview','duplicateTarget','duplicateResolved'].filter(k=>h[k]!==undefined&&isCellValue(get(k)));
-        if(!relevant.length)continue;
-        const district=mapDistrict(get('district')),ds=mapDataset(get('ds'));
-        if(!district||!ds)throw new Error('ชีตความคืบหน้า แถว '+(i+1)+': ชุดข้อมูลหรืออำเภอไม่ถูกต้อง');
-        const key=ds+'|'+district;if(usedProgress.has(key))throw new Error('พบอำเภอซ้ำในความคืบหน้า: '+key);usedProgress.add(key);
-        const old=getRow(ds,district),value=(k,base)=>h[k]!==undefined&&isCellValue(get(k))?parsedCount(get(k),'แถว '+(i+1)+' '+k):base;
-        const target=value('target',old.target);let completed=value('completed',old.completed);
-        if(h.completed!==undefined&&!isCellValue(get('completed'))&&h.percent!==undefined&&isCellValue(get('percent'))){
-          const per=Number(String(get('percent')).replace(/%/g,''));if(!Number.isFinite(per)||per<0||per>100)throw new Error('เปอร์เซ็นต์แถว '+(i+1)+' ต้องอยู่ในช่วง 0–100');
-          completed=Math.round(target*per/100);result.notes.push('แถว '+(i+1)+' คำนวณผลจัดเก็บจากเปอร์เซ็นต์และปัดเป็นจำนวนเต็ม');
+      // รองรับรายงานส่งออกที่ไม่มีคอลัมน์ "ประเภทข้อมูล" โดยอนุมานเป็น จปฐ. จากชื่อไฟล์
+      // หรือชื่อชีต เมื่อมีหัวข้ออำเภอ/เป้าหมาย/ผลจัดเก็บครบพอ
+      const jptHint=/จปฐ|ความจำเป็นพื้นฐาน|jpt/i.test(String(meta.fileName||''))||/จปฐ|ความจำเป็นพื้นฐาน/i.test(String(progressSheet||''));
+      if(h.ds===undefined&&jptHint&&h.district!==undefined&&h.target!==undefined&&(h.completed!==undefined||h.percent!==undefined)){
+        const parsed=[],seen=new Set();
+        for(let i=headerIndex+1;i<rows.length;i++){
+          const row=rowCells(rows[i]),district=mapDistrict(row[h.district]);
+          if(!district)continue;
+          if(seen.has(district))throw new Error('พบอำเภอซ้ำในรายงาน: '+String(row[h.district]||''));seen.add(district);
+          const old=getRow('jpt',district);
+          const target=parsedCount(row[h.target],'แถว '+(i+1)+' เป้าหมาย');
+          let completed=h.completed!==undefined&&isCellValue(row[h.completed])?parsedCount(row[h.completed],'แถว '+(i+1)+' ผลจัดเก็บ'):old.completed;
+          if((h.completed===undefined||!isCellValue(row[h.completed]))&&h.percent!==undefined&&isCellValue(row[h.percent])){
+            const per=Number(String(row[h.percent]).replace(/,/g,'').replace(/%/g,''));
+            if(!Number.isFinite(per)||per<0||per>100)throw new Error('เปอร์เซ็นต์แถว '+(i+1)+' ต้องอยู่ในช่วง 0–100');
+            completed=Math.round(target*per/100);
+          }
+          const pendingReview=h.pendingReview!==undefined&&isCellValue(row[h.pendingReview])?parsedCount(row[h.pendingReview],'แถว '+(i+1)+' ครัวเรือนรอตรวจสอบ'):old.pendingReview;
+          if(completed>target)throw new Error('แถว '+(i+1)+' จำนวนจัดเก็บมากกว่าเป้าหมาย');
+          parsed.push({dataset:'jpt',district,target,completed,pendingReview,duplicateTarget:old.duplicateTarget||0,duplicateResolved:old.duplicateResolved||0,grossCompleted:completed,duplicateHouseholds:old.duplicateHouseholds||0,duplicatePersons:old.duplicatePersons||0,pendingPersons:old.pendingPersons||0});
         }
-        const pendingReview=ds==='jpt'?value('pendingReview',old.pendingReview):0;
-        const duplicateTarget=ds==='jpt'?value('duplicateTarget',old.duplicateTarget):0;
-        const duplicateResolved=ds==='jpt'?value('duplicateResolved',old.duplicateResolved):0;
-        if(completed>target)throw new Error('แถว '+(i+1)+': จำนวนจัดเก็บมากกว่าเป้าหมาย');
-        if(pendingReview>target)throw new Error('แถว '+(i+1)+': ครัวเรือนรอตรวจสอบมากกว่าเป้าหมาย');
-        if(duplicateResolved>duplicateTarget)throw new Error('แถว '+(i+1)+': ตรวจสอบประชากรซ้ำเกินจำนวนทั้งหมด');
-        result.progress.push({dataset:ds,district,target,completed,pendingReview,duplicateTarget,duplicateResolved,grossCompleted:old.grossCompleted??completed,duplicateHouseholds:old.duplicateHouseholds||0,duplicatePersons:old.duplicatePersons||0,pendingPersons:old.pendingPersons||0});
+        if(!parsed.length)throw new Error('ไม่พบแถวข้อมูลอำเภอในรายงาน จปฐ.');
+        result.progress.push(...parsed);result.notes.push('ตรวจพบรายงาน จปฐ. ที่ไม่มีคอลัมน์ประเภทข้อมูล · อนุมานชุดข้อมูลเป็น จปฐ. จากชื่อไฟล์');
+      }else{
+        if(h.ds===undefined||h.district===undefined||h.target===undefined)throw new Error('ชีตความคืบหน้าต้องมีหัวข้อ ประเภทข้อมูล, อำเภอ, เป้าหมาย หรือใช้รายงานส่งออก จปฐ. ที่มีหัวข้อ อำเภอ, เป้าหมายการจัดเก็บ และผลการจัดเก็บ');
+        for(let i=headerIndex+1;i<rows.length;i++){
+          const row=rowCells(rows[i]),get=k=>row[h[k]];
+          const relevant=['target','completed','percent','pendingReview','duplicateTarget','duplicateResolved'].filter(k=>h[k]!==undefined&&isCellValue(get(k)));
+          if(!relevant.length)continue;
+          const district=mapDistrict(get('district')),ds=mapDataset(get('ds'));
+          if(!district||!ds)throw new Error('ชีตความคืบหน้า แถว '+(i+1)+': ชุดข้อมูลหรืออำเภอไม่ถูกต้อง');
+          const key=ds+'|'+district;if(usedProgress.has(key))throw new Error('พบอำเภอซ้ำในความคืบหน้า: '+key);usedProgress.add(key);
+          const old=getRow(ds,district),value=(k,base)=>h[k]!==undefined&&isCellValue(get(k))?parsedCount(get(k),'แถว '+(i+1)+' '+k):base;
+          const target=value('target',old.target);let completed=value('completed',old.completed);
+          if(h.completed!==undefined&&!isCellValue(get('completed'))&&h.percent!==undefined&&isCellValue(get('percent'))){
+            const per=Number(String(get('percent')).replace(/%/g,''));if(!Number.isFinite(per)||per<0||per>100)throw new Error('เปอร์เซ็นต์แถว '+(i+1)+' ต้องอยู่ในช่วง 0–100');
+            completed=Math.round(target*per/100);result.notes.push('แถว '+(i+1)+' คำนวณผลจัดเก็บจากเปอร์เซ็นต์และปัดเป็นจำนวนเต็ม');
+          }
+          const pendingReview=ds==='jpt'?value('pendingReview',old.pendingReview):0;
+          const duplicateTarget=ds==='jpt'?value('duplicateTarget',old.duplicateTarget):0;
+          const duplicateResolved=ds==='jpt'?value('duplicateResolved',old.duplicateResolved):0;
+          if(completed>target)throw new Error('แถว '+(i+1)+': จำนวนจัดเก็บมากกว่าเป้าหมาย');
+          if(pendingReview>target)throw new Error('แถว '+(i+1)+': ครัวเรือนรอตรวจสอบมากกว่าเป้าหมาย');
+          if(duplicateResolved>duplicateTarget)throw new Error('แถว '+(i+1)+': ตรวจสอบประชากรซ้ำเกินจำนวนทั้งหมด');
+          result.progress.push({dataset:ds,district,target,completed,pendingReview,duplicateTarget,duplicateResolved,grossCompleted:old.grossCompleted??completed,duplicateHouseholds:old.duplicateHouseholds||0,duplicatePersons:old.duplicatePersons||0,pendingPersons:old.pendingPersons||0});
+        }
       }
     }
     if(indicatorSheet){
@@ -1001,7 +1070,7 @@
     }else if(/\.xlsx$/i.test(file.name)){
       workbook=await readXlsxWorkbook(file);
     }else throw new Error('ชนิดไฟล์ Excel ไม่ถูกต้อง รองรับ .xlsx หรือ .csv');
-    return parseWorkbookForImport(workbook);
+    return parseWorkbookForImport(workbook,{fileName:file.name});
   }
   async function loadImportDraft(){
     const files=Array.from($('excelFile').files||[]);
